@@ -33,12 +33,13 @@ clean:
 	@echo "==> Cleaning up..."
 	@rm -rf $(BUILD_DIR)
 	@rm -rf coverage project_template.profdata
+	@rm *.gp *.dat *.png *.dot
 
 rebuild: clean build
 
 install:
 	sudo apt-get update
-	sudo apt-get install -y cmake clang libgtest-dev
+	sudo apt-get install -y cmake clang libgtest-dev ninja-build
 
 coverage: test
 	@llvm-profdata merge -sparse $(BUILD_DIR)/tests/default.profraw -o project_template.profdata
