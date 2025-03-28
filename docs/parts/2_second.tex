@@ -1,0 +1,48 @@
+\subsection{Анализ надёжности системы}\label{sec:reliability}
+
+\subsubsection{Основные положения теории надёжности}
+Основной характеристикой надёжности системы является вероятность безотказной работы $P(t)$, которая описывается экспоненциальным законом распределения:
+
+\begin{equation}
+P(t) = e^{-\lambda t}
+\end{equation}
+
+где $\lambda$ -- интенсивность отказов системы, $t$ -- время работы.
+
+\subsubsection{Марковская модель системы}
+Для анализа надёжности сложных систем используем марковские процессы с непрерывным временем. Состояния системы представлены на рис.\ \ref{fig:state_graph}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/state_graph.png}
+\caption{Граф состояний системы}
+\label{fig:state_graph}
+\end{figure}
+
+Система дифференциальных уравнений Колмогорова:
+
+\begin{equation}
+\begin{cases}
+\frac{dP_0}{dt} = -(\lambda_{01} + \lambda_{02})P_0(t) + \mu_{10}P_1(t) + \mu_{20}P_2(t) \\
+\frac{dP_1}{dt} = \lambda_{01}P_0(t) - (\mu_{10} + \lambda_{13})P_1(t) \\
+\frac{dP_2}{dt} = \lambda_{02}P_0(t) - (\mu_{20} + \lambda_{23})P_2(t) \\
+\frac{dP_3}{dt} = \lambda_{13}P_1(t) + \lambda_{23}P_2(t)
+\end{cases}
+\end{equation}
+
+\subsubsection{Результаты расчётов}
+На рис.\ \ref{fig:reliability_function} представлены графики вероятностей состояний системы при различных значениях интенсивностей отказов.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{images/reliability_function.png}
+\caption{Вероятности состояний системы во времени}
+\label{fig:reliability_function}
+\end{figure}
+
+Основные выводы:
+\begin{itemize}
+\item Среднее время безотказной работы системы составляет $T_{ср} = 1/\lambda = 850$ ч
+\item Вероятность безотказной работы за 1000 часов: $P(1000) = 0.318$
+\item Критическими компонентами являются блоки 1 и 2 (см. рис.\ \ref{fig:state_graph})
+\end{itemize}

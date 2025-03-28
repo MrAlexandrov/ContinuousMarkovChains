@@ -1,0 +1,114 @@
+%----------------------------------------------------------
+%%%       ���, 2011-2012-2013 �.
+%%%       ��������� ����
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\NirTitle}[1]{
+ \thispagestyle{empty}
+
+\bgroup
+    \centering
+
+   % \hrule height 0.5pt
+   % \vskip3pt
+    \bgroup
+      \UpperFullOrganisationName
+    \egroup
+   % \vskip3pt
+   % \hrule height 0.5pt
+
+    \vskip3mm
+
+    \bgroup
+      \FullOrganisationName
+    \egroup
+
+    \vskip4mm
+
+    \hbox to \hsize
+       \bgroup
+         \parbox[t]{80mm}
+            {
+            \raggedright\vskip5mm\noindent
+            ��� \UDK\newline
+            ����� �������������� \No\NIRcitis\newline
+          %  ��� ����� \GRNTI\newline
+            ���. \InvNum\newline
+            }
+            \hfil
+         \parbox[t]{68.0mm}
+            {
+             \centering
+             ���������\par
+             \vskip2mm
+             \OrgBossPosition\\
+            % \ShortOrganisationName\\
+             \OrgBossScDegree, \OrgBossScPosition\par
+             \vskip5mm
+             \textunderset{}{\signvrule} \quad \OrgBossName\par
+             \vskip2mm
+             \datetofill
+             %"\vrule height0.5pt width8mm depth0pt{}" \vrule height0.5pt width20mm depth0pt{} 20\vrule height0.5pt width7mm depth0pt{} �.
+            }
+       \egroup
+
+
+    \vskip7mm
+
+    \bgroup
+			\begin{center}
+			
+      \textnormal{\large\textbf{\MakeUppercase{�����}}} \\
+       \textnormal{\large\textbf{\MakeUppercase{\ReportType}}}
+       \end{center}
+    \egroup
+
+    %\vskip2mm
+
+    \bgroup
+       
+%\leftskip0pt\rightskip0pt\parfillskip=0ptplus1fil\parskip3.5mm
+
+       %�� ������� \NIRid: \MakeUppercase{<<#1>>}, \\ 
+       %� ������ ���������� ���������: \NIRProgram. \\
+			 %�����������: \No\NIRGovActionNo: <<\NIRGovAction>>.\\
+			 %������: \No\NIRGovSectionNo: <<\NIRGovSection>>.\\
+			 %���������: \No\NIRGovSubSectionNo: <<\NIRGovSubSection>>.\\
+       %����: \NIRStageNo.\\   			
+		\begin{center}
+			\DocTheme \\ 
+				
+			�� ����: \\
+			\MakeUppercase{\DocWork}  \\ 
+%		(\textnormal{\large{\NIRReportType}}, ���� �\NIRStageNo)	 \\
+		(\NIRReportType, ���� �\NIRStageNo)	 \\
+		��������������� �������� �\ContractNum �� \ContractDate \\
+		���� <<\Shifr>>
+		\end{center}
+       %\begin{center} ( \NIRReportType ) \end{center}\\
+       %\begin{center} \NIRid \end{center}
+       %��� ������: \NIRReportType.\\
+    \egroup
+
+   % \vskip15mm
+
+   % \hbox to \hsize{%
+     %  \parbox[t]{55mm}{
+    \vskip1mm
+		\begin{flushleft}
+
+\begin{tabular}{p{0.50\textwidth}p{0.18\textwidth}p{0.21\textwidth}}
+			 ������������ �������, & & \\	
+   		 \executer{\NIRManagerPosition\enskip\OrgExecutiveDepartment, \NIRManagerScDegree}{\NIRManagerName}{}
+			 %& & \\
+   		 \executer{��������������}{\NormControlName}{}
+\end{tabular}
+
+		\end{flushleft}
+
+		\vskip5mm
+		\NirTown~\NirYear\\ 
+\egroup
+
+}
+%----------------------------------------------------------
+
