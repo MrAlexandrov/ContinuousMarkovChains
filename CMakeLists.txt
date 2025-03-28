@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(project_template CXX)
+project(MarkovModel CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -11,7 +11,10 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    /usr/include/eigen3
+)
 
 file(GLOB SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 

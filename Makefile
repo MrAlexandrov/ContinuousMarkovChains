@@ -1,4 +1,4 @@
-PROJECT_NAME = project_template
+PROJECT_NAME = MarkovModel
 
 INPUT_FILE = input.txt
 OUTPUT_FILE = output.txt

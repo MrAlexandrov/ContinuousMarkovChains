@@ -1,6 +1,9 @@
 {
     "files.associations": {
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "ostream": "cpp",
+        "dense": "cpp",
+        "iostream": "cpp"
     },
     "cmake.sourceDirectory": "${workspaceFolder}",
     "cmake.buildDirectory": "${workspaceFolder}/build",
@@ -20,4 +23,5 @@
         "-I${workspaceFolder}/src",
         "-I${workspaceFolder}/include",
     ],
+    "C_Cpp.errorSquiggles": "disabled",
 }

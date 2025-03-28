@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
-#include "project_template.hpp"
 
-using namespace NProject_template;
+// using namespace NProject_template;
 
 
 

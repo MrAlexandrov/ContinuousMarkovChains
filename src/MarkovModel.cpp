@@ -1,4 +1,5 @@
 #include "MarkovModel.h"
+#include "SystemParams.h"
 #include <iostream>
 #include <Eigen/Dense>
 // #include <numeric>
@@ -55,6 +56,9 @@ std::pair<Eigen::VectorXd, Eigen::MatrixXd> MarkovModel::solveKolmogorovEquation
         probabilities.col(i + 1) = pi;
     }
     
+    // Output probabilities matrix
+    std::cout << "\nProbability Matrix (" << probabilities.rows() << "x" << probabilities.cols() << "):\n";
+    std::cout << probabilities.leftCols(5).format(Eigen::IOFormat(4, 0, ", ", "\n", "[", "]")) << "\n";
     return {times, probabilities};
 }
 
@@ -135,7 +139,7 @@ void MarkovModel::buildTransitionMatrix() {
     }
     
     // Output transition matrix
-    std::cout << "\nTransition Matrix Q:\n";
+    std::cout << "\nTransition Matrix Q (" << Q.rows() << "x" << Q.cols() << "):\n";
     Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
     std::cout << Q.format(CleanFmt) << "\n";
 }
