@@ -1,4 +1,6 @@
 #include "MarkovModel.h"
+#include <iostream>
+#include <Eigen/Dense>
 // #include <numeric>
 
 MarkovModel::MarkovModel(const SystemParams& params) : params(params) {
@@ -131,4 +133,9 @@ void MarkovModel::buildTransitionMatrix() {
             // В нерабочих состояниях диагональный элемент равен 0 (потому что система уже отказала)
         }
     }
+    
+    // Output transition matrix
+    std::cout << "\nTransition Matrix Q:\n";
+    Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+    std::cout << Q.format(CleanFmt) << "\n";
 }
