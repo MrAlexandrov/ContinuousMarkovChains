@@ -102,8 +102,13 @@ void MarkovModel::buildTransitionMatrix() {
         for (int b = 0; b <= totalB; ++b) {
             int currentState = system.stateToIndex(a, b);
             
-            // Если система в рабочем состоянии, рассчитываем переходы
-            if (a >= 1 && b >= params.NB) {
+            // Рассчитываем интенсивности для всех состояний
+            double rateA = (a > 0) ? a * params.lambdaA : 0;
+            double rateB = (b > 0) ? b * params.lambdaB : 0;
+            double totalRate = rateA + rateB;
+
+            // Process all states
+            {
                 double rateA = a * params.lambdaA;  // Интенсивность отказа A
                 double rateB = b * params.lambdaB;  // Интенсивность отказа B
                 double totalRate = rateA + rateB;   // Суммарная интенсивность выхода
