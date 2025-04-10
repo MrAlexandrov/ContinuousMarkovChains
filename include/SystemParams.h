@@ -8,7 +8,6 @@ struct SystemParams {
     int RA;          // Число резервных устройств A
     int RB;          // Число резервных устройств B
 
-    // Конструктор для задания параметров на основе номера зачетки и группы
     SystemParams(int N, int G)
         : lambdaA(G + (N % 3))
         , lambdaB(G + (N % 5))

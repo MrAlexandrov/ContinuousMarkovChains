@@ -1,7 +1,6 @@
 #include "Simulator.h"
 #include <random>
 #include <cmath>
-#include <algorithm>
 #include <numeric>
 
 Simulator::Simulator(const SystemParams& params)

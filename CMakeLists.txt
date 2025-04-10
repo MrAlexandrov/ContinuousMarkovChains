@@ -22,13 +22,13 @@ add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/main.cpp ${SRC_FILES})
 
 if(NOT Eigen3_FOUND)
     message(STATUS "Eigen3 not found on system, downloading it...")
- 
+
     # Path to download and extract Eigen
     set(EIGEN_VERSION 3.4.0)
     set(EIGEN_URL https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz)
     set(EIGEN_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen-download")
     set(EIGEN_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen-install")
- 
+
     # Download Eigen
     include(ExternalProject)
     ExternalProject_Add(
@@ -41,11 +41,11 @@ if(NOT Eigen3_FOUND)
         CONFIGURE_COMMAND "" # Skip configure step
         BUILD_COMMAND ""    # Skip build step
     )
- 
+
     # Set up include directory for Eigen
     set(EIGEN3_INCLUDE_DIR "${EIGEN_DOWNLOAD_DIR}/src/eigen")
     message(STATUS "Eigen3 include directory: ${EIGEN3_INCLUDE_DIR}")
- 
+
     # Add dependency on the external project
     add_dependencies(${PROJECT_NAME} eigen)
 else()
