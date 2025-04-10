@@ -74,9 +74,9 @@ std::vector<std::pair<double, int>> Simulator::simulateTrajectory() {
         t += timeToNext;
 
         if (uniformDist(rng) < (A * params.lambdaA) / totalRate) {
-            A--;
+            --A;
         } else {
-            B--;
+            --B;
         }
 
         trajectory.push_back({t, system.stateToIndex(A, B)});
