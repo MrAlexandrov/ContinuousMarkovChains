@@ -88,7 +88,7 @@ void runTask2(int N, int G) {
         DotGraphGenerator::generateStateGraph(system, "state_graph_task2");
         DotGraphGenerator::generateTransitionGraph(model.getTransitionMatrix(), params, "transition_graph_task2");
         std::cout << "Граф состояний сохранен в файлах state_graph_task2.dot и state_graph_task2.png" << std::endl;
-        std::cout << "Граф переходов сохранен в файлах transition_graph_task2.dot и transition_graph_task2.png" << std::endl;    
+        std::cout << "Граф переходов сохранен в файлах transition_graph_task2.dot и transition_graph_task2.png" << std::endl; 
     } catch (const std::exception& e) {
         std::cerr << "Error while plotting graph: " << e.what() << std::endl;
     }
