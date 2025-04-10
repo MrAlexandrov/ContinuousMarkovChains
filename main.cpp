@@ -170,32 +170,28 @@ void runTask2(int N, int G) {
 }
 
 int main() {
-    // Инициализация параметров из условия
-    int N = 260; // Номер зачетки
-    int G = 1;   // Группа
+    int N = 260;
+    int G = 1;
 
-        std::string taskChoice;
-        std::ifstream input("input.txt");
-        std::getline(input, taskChoice);
-        input.close();
+    std::string taskChoice;
+    std::ifstream input("input.txt");
+    std::getline(input, taskChoice);
+    input.close();
 
-        std::cout << "Выбрана опция: " << taskChoice << std::endl;
+    std::cout << "Выбрана опция: " << taskChoice << std::endl;
 
-        if (taskChoice == "1") {
-            runTask1(N, G);
-        }
-        else if (taskChoice == "2") {
-            runTask2(N, G);
-        }
-        else if (taskChoice == "all") {
-            runTask1(N, G);
-            runTask2(N, G);
-        }
-        else {
-            std::cout << "Неверный выбор. Выполняются обе задачи." << std::endl;
-            runTask1(N, G);
-            runTask2(N, G);
-        }
+    if (taskChoice == "1") {
+        runTask1(N, G);
+    } else if (taskChoice == "2") {
+        runTask2(N, G);
+    } else if (taskChoice == "all") {
+        runTask1(N, G);
+        runTask2(N, G);
+    } else {
+        std::cout << "Неверный выбор. Выполняются обе задачи." << std::endl;
+        runTask1(N, G);
+        runTask2(N, G);
+    }
 
     return 0;
 }
