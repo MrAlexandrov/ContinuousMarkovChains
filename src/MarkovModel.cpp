@@ -57,73 +57,64 @@ std::pair<Eigen::VectorXd, Eigen::MatrixXd> MarkovModel::solveKolmogorovEquation
 }
 
 Eigen::VectorXd MarkovModel::getReliabilityFunction(const Eigen::MatrixXd& probabilities) {
-    // Функция надежности - вероятность, что система не находится в отказовых состояниях
     Eigen::VectorXd reliability(probabilities.cols());
-    
+
     System system(params);
     for (int t = 0; t < probabilities.cols(); ++t) {
         double failureProb = 0.0;
-        
+
         for (int s = 0; s < numStates; ++s) {
             auto [a, b] = system.indexToState(s);
-            if (a < 1 || b < params.NB) { // Если это отказовое состояние
+            if (a < 1 || b < params.NB) {
                 failureProb += probabilities(s, t);
             }
         }
-        
+
         reliability(t) = 1.0 - failureProb;
     }
-    
+
     return reliability;
 }
 
 double MarkovModel::calculateMTTF(const Eigen::VectorXd& times, const Eigen::VectorXd& reliability) {
-    // Вычисляем интеграл методом трапеций
     double mttf = 0.0;
     
     for (int i = 0; i < times.size() - 1; ++i) {
         double dt = times(i + 1) - times(i);
         mttf += dt * (reliability(i) + reliability(i + 1)) / 2.0;
     }
-    
+
     return mttf;
 }
 
 void MarkovModel::buildTransitionMatrix() {
-    // Инициализируем матрицу нулями
     Q = Eigen::MatrixXd::Zero(numStates, numStates);
     
     System system(params);
     const int totalA = params.NA + params.RA;
     const int totalB = params.NB + params.RB;
-    
-    // Для каждого состояния рассчитываем возможные переходы
+
     for (int a = 0; a <= totalA; ++a) {
         for (int b = 0; b <= totalB; ++b) {
             int currentState = system.stateToIndex(a, b);
-            
-            // Если система в рабочем состоянии, рассчитываем переходы
+
             if (a >= 1 && b >= params.NB) {
-                double rateA = a * params.lambdaA;  // Интенсивность отказа A
-                double rateB = b * params.lambdaB;  // Интенсивность отказа B
-                double totalRate = rateA + rateB;   // Суммарная интенсивность выхода
-                
-                // Отказ устройства A
+                double rateA = a * params.lambdaA;
+                double rateB = b * params.lambdaB;
+                double totalRate = rateA + rateB;
+
                 if (a > 0) {
                     int nextState = system.stateToIndex(a - 1, b);
                     Q(currentState, nextState) = rateA;
                 }
                 
-                // Отказ устройства B
                 if (b > 0) {
                     int nextState = system.stateToIndex(a, b - 1);
                     Q(currentState, nextState) = rateB;
                 }
                 
-                // Диагональный элемент (сумма интенсивностей выхода с отрицательным знаком)
                 Q(currentState, currentState) = -totalRate;
             }
-            // В нерабочих состояниях диагональный элемент равен 0 (потому что система уже отказала)
         }
     }
 }

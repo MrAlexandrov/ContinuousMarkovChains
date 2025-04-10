@@ -13,9 +13,9 @@ bool System::isOperational() const {
 
 void System::deviceFailure(char deviceType) {
     if (deviceType == 'A' && workingA > 0) {
-        workingA--;
+        --workingA;
     } else if (deviceType == 'B' && workingB > 0) {
-        workingB--;
+        --workingB;
     }
 }
 
@@ -30,14 +30,16 @@ int System::stateToIndex(int a, int b) const {
 }
 
 std::pair<int, int> System::indexToState(int index) const {
-    int totalB = params.NB + params.RB + 1;
-    int a = params.NA + params.RA - (index / totalB);
-    int b = params.NB + params.RB - (index % totalB);
+    int totalB = params.NB + params.RB;
+    int a = params.NA + params.RA - (index / (totalB + 1));
+    int b = params.NB + params.RB - (index % (totalB + 1));
     return {a, b};
 }
 
 int System::getTotalStates() const {
-    return (params.NA + params.RA + 1) * (params.NB + params.RB + 1);
+    int totalA = params.NA + params.RA;
+    int totalB = params.NB + params.RB;
+    return (totalA + 1) * (totalB + 1);
 }
 
 const SystemParams& System::getParams() const {
