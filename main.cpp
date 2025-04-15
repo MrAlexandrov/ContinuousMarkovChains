@@ -78,25 +78,27 @@ void runTask2(int N, int G) {
     std::cout << "RA = " << params.RA << "\n";
     std::cout << "RB = " << params.RB << "\n";
 
+    // Создаем модель для построения матрицы переходов
     RepairableMarkovModel model(params);
     model.buildTransitionMatrix();
 
+    // Сохраняем полную матрицу переходов
     saveMatrix(model.getTransitionMatrix(), "transition_matrix_task2.dat");
-
-    try {
-        System system(params);
-        DotGraphGenerator::generateStateGraph(system, "state_graph_task2");
-        DotGraphGenerator::generateTransitionGraph(model.getTransitionMatrix(), params, "transition_graph_task2");
-        std::cout << "Граф состояний сохранен в файлах state_graph_task2.dot и state_graph_task2.png" << std::endl;
-        std::cout << "Граф переходов сохранен в файлах transition_graph_task2.dot и transition_graph_task2.png" << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "Error while plotting graph: " << e.what() << std::endl;
-    }
+    
+    // Создаем и сохраняем матрицу переходов в формате графа состояний
+    Eigen::MatrixXd graphQ = model.buildGraphTransitionMatrix();
+    saveMatrix(graphQ, "graph_transition_matrix_task2.dat");
+    
+    std::cout << "Матрица переходов сохранена в файлах transition_matrix_task2.dat и graph_transition_matrix_task2.dat" << std::endl;
+    
+    // Создаем систему только для генерации графа состояний
 
     RepairableSystem system(params);
-    // Примечание: DotGraphGenerator не поддерживает RepairableSystem
-    // Для полной реализации нужно расширить функциональность DotGraphGenerator
-    std::cout << "Граф состояний и граф переходов для системы с ремонтом не реализованы" << std::endl;
+    DotGraphGenerator::generateRepairableStateGraph(system, "state_graph_task2");
+    // Закомментировано, так как требует модель
+    // DotGraphGenerator::generateRepairableTransitionGraph(model.getTransitionMatrix(), params, "transition_graph_task2");
+    std::cout << "Граф состояний сохранен в файлах state_graph_task2.dot и state_graph_task2.png" << std::endl;
+    // std::cout << "Граф переходов сохранен в файлах transition_graph_task2.dot и transition_graph_task2.png" << std::endl;
 
     // Решаем стационарные уравнения Колмогорова
     Eigen::VectorXd steadyStateProbs = model.solveSteadyStateEquations();
@@ -174,9 +176,10 @@ int main() {
     int G = 1;
 
     std::string taskChoice;
-    std::ifstream input("input.txt");
-    std::getline(input, taskChoice);
-    input.close();
+    std::cin >> taskChoice;
+    // std::ifstream input("input.txt");
+    // std::getline(input, taskChoice);
+    // input.close();
 
     std::cout << "Выбрана опция: " << taskChoice << std::endl;
 
