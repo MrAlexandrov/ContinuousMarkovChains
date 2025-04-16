@@ -1,6 +1,9 @@
 #pragma once
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
+
+// Forward declaration
+class RepairableMarkovModel;
 
 #include <vector>
 #include <string>
@@ -20,4 +23,10 @@ public:
     static void plotRepairableStates(const Eigen::VectorXd& times, const Eigen::MatrixXd& probabilities, const std::string& outputPrefix = "repairable_states");
 
     static void plotRepairableTrajectory(const std::vector<std::tuple<double, int, int, int>>& trajectory, const std::string& outputPrefix = "repairable_trajectory");
+
+    static void plotAggregatedStates(
+        const Eigen::VectorXd& times,
+        const Eigen::MatrixXd& probabilities,
+        const RepairableMarkovModel& model,
+        const std::string& outputPrefix = "aggregated_states");
 };

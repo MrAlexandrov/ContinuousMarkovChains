@@ -1,10 +1,29 @@
-#include "RepairableMarkovModel.h"
+#include "../include/RepairableMarkovModel.h"
+#include "../include/RepairableSystem.h"
+#include "../include/RepairableSystemParams.h"
+#include <eigen3/Eigen/Dense>
 
 #include <numeric>
 #include <cmath>
 
 RepairableMarkovModel::RepairableMarkovModel(const RepairableSystemParams& params)
     : params(params)
+{
+    RepairableSystem system(params);
+    numStates = system.getTotalStates();
+
+    Q = Eigen::MatrixXd::Zero(numStates, numStates);
+    initialState = Eigen::VectorXd::Zero(numStates);
+
+    auto [totalA, totalB] = system.getMaxDevices();
+    initialState(system.stateToIndex(totalA, totalB, 0)) = 1.0;
+
+    buildTransitionMatrix();
+}
+
+// Alternative constructor with explicit parameters for both tasks
+RepairableMarkovModel::RepairableMarkovModel(double lambdaA, double lambdaB, int NA, int NB, int RA, int RB, double lambdaS)
+    : params(RepairableSystemParams(lambdaA, lambdaB, NA, NB, RA, RB, lambdaS))
 {
     RepairableSystem system(params);
     numStates = system.getTotalStates();
@@ -276,6 +295,24 @@ Eigen::VectorXd RepairableMarkovModel::getOperationalStates() const {
     }
 
     return operationalStates;
+}
+
+// New method to aggregate probabilities by device states (ignoring repair states)
+Eigen::VectorXd RepairableMarkovModel::getAggregatedStateProbabilities(const Eigen::VectorXd& stateProbs) const {
+    RepairableSystem system(params);
+    const int totalA = params.NA + params.RA;
+    const int totalB = params.NB + params.RB;
+    
+    // Number of aggregated states = (totalA+1)*(totalB+1)
+    Eigen::VectorXd aggregatedProbs = Eigen::VectorXd::Zero((totalA+1)*(totalB+1));
+
+    for (int i = 0; i < numStates; ++i) {
+        auto [a, b, r] = system.indexToState(i);
+        int aggregatedIndex = b * (totalA+1) + a;
+        aggregatedProbs(aggregatedIndex) += stateProbs(i);
+    }
+
+    return aggregatedProbs;
 }
 
 Eigen::MatrixXd RepairableMarkovModel::buildGraphTransitionMatrix() const {

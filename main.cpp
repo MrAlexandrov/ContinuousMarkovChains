@@ -1,10 +1,13 @@
-#include "MarkovModel.h"
-#include "Simulator.h"
-#include "GnuplotPlotter.h"
-#include "DotGraphGenerator.h"
-#include "RepairableSystem.h"
-#include "RepairableMarkovModel.h"
-#include "RepairableSimulator.h"
+#include "../include/MarkovModel.h"
+#include "../include/Simulator.h"
+#include "../include/GnuplotPlotter.h"
+#include "../include/DotGraphGenerator.h"
+#include "../include/RepairableSystem.h"
+#include "../include/RepairableMarkovModel.h"
+#include "../include/RepairableSimulator.h"
+#include "../include/System.h"
+#include "../include/SystemParams.h"
+#include <eigen3/Eigen/Dense>
 
 #include <exception>
 #include <iostream>
@@ -122,9 +125,9 @@ void runTask2(int N, int G) {
     double modelingTime = 2 * transientTime;  // Время моделирования вдвое больше времени переходного процесса
     auto [times, probabilities] = model.solveKolmogorovEquations(modelingTime, 200);
 
-    // Визуализация результатов
-    GnuplotPlotter::plotStatesProbabilities(times, probabilities, "states_probabilities_task2");
-    std::cout << "График вероятностей состояний сохранен в файл states_probabilities_task2.png" << std::endl;
+    // Визуализация результатов (агрегированные состояния)
+    GnuplotPlotter::plotAggregatedStates(times, probabilities, model, "states_probabilities_task2");
+    std::cout << "График агрегированных вероятностей состояний (18 состояний) сохранен в файл states_probabilities_task2.png" << std::endl;
 
     // Имитационное моделирование (непрерывные марковские цепи)
     RepairableSimulator simulator(params);

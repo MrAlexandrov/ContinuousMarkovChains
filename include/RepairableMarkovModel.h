@@ -2,7 +2,7 @@
 
 #include "RepairableSystem.h"
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <utility>
 #include <vector>
 
@@ -19,6 +19,7 @@ private:
 
 public:
     RepairableMarkovModel(const RepairableSystemParams& params);
+    RepairableMarkovModel(double lambdaA, double lambdaB, int NA, int NB, int RA, int RB, double lambdaS);
 
     // Строит матрицу интенсивностей переходов
     void buildTransitionMatrix();
@@ -50,4 +51,7 @@ public:
 
     // Возвращает вектор указывающий на работоспособность системы
     Eigen::VectorXd getOperationalStates() const;
+
+    // Агрегирует вероятности состояний по устройствам (игнорируя состояния ремонта)
+    Eigen::VectorXd getAggregatedStateProbabilities(const Eigen::VectorXd& stateProbs) const;
 };

@@ -1,4 +1,12 @@
 #include "GnuplotPlotter.h"
+#include "RepairableMarkovModel.h"
+#include <fstream>
+#include <cstdlib>
+#include <sstream>
+#include <vector>
+#include <fstream>
+#include <cstdlib>
+#include <sstream>
 #include <fstream>
 #include <cstdlib>
 #include <sstream>
@@ -114,11 +122,21 @@ void GnuplotPlotter::plotTrajectories(
     std::system(command.c_str());
 }
 
+#include "RepairableMarkovModel.h"
+
 void GnuplotPlotter::plotRepairableStates(const Eigen::VectorXd& times, const Eigen::MatrixXd& probabilities, const std::string& outputPrefix) {
+    // First create aggregated probabilities (sum over repair states)
+    Eigen::MatrixXd aggregatedProbs(18, probabilities.cols());
+    RepairableMarkovModel model(RepairableSystemParams(0,0)); // Temporary for aggregation
+    
+    for (int t = 0; t < probabilities.cols(); ++t) {
+        aggregatedProbs.col(t) = model.getAggregatedStateProbabilities(probabilities.col(t));
+    }
+
     std::ofstream script(outputPrefix + ".gp");
     script << "set terminal png size 800,600\n";
     script << "set output '" << outputPrefix << ".png'\n";
-    script << "set title 'Вероятности состояний системы с ремонтом'\n";
+    script << "set title 'Вероятности состояний системы (агрегированные)'\n";
     script << "set xlabel 'Время'\n";
     script << "set ylabel 'Вероятность'\n";
     script << "set grid\n";
@@ -126,24 +144,22 @@ void GnuplotPlotter::plotRepairableStates(const Eigen::VectorXd& times, const Ei
 
     std::ofstream datafile(outputPrefix + ".dat");
     datafile << "# Time ";
-    for (int i = 0; i < probabilities.rows(); ++i) {
+    for (int i = 0; i < aggregatedProbs.rows(); ++i) {
         datafile << "State" << i << " ";
     }
     datafile << "\n";
 
     for (int t = 0; t < times.size(); ++t) {
         datafile << times(t) << " ";
-        for (int i = 0; i < probabilities.rows(); ++i) {
-            datafile << probabilities(i, t) << " ";
+        for (int i = 0; i < aggregatedProbs.rows(); ++i) {
+            datafile << aggregatedProbs(i, t) << " ";
         }
         datafile << "\n";
     }
     datafile.close();
 
-    int maxStates = std::min(10, static_cast<int>(probabilities.rows()));
-
     script << "plot ";
-    for (int i = 0; i < maxStates; ++i) {
+    for (int i = 0; i < aggregatedProbs.rows(); ++i) {
         if (i > 0) script << ", ";
         script << "'" << outputPrefix << ".dat' using 1:" << (i + 2) << " with lines title 'State " << i << "'";
     }
