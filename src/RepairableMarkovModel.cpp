@@ -36,37 +36,45 @@ void RepairableMarkovModel::buildTransitionMatrix() {
 
                 double totalRate = 0.0;
 
-                // Отказ устройства A
-                if (a > 0) {
-                    double rateA = getFailureRate(a, b, 'A');
-                    int nextA = a - 1;
-                    int nextR = (r == 0) ? 1 : r;
+                // Only add failure transitions if the system is operational
+                if (a >= 1 && b >= params.NB) {
+                    // Отказ устройства A
+                    if (a > 0) {
+                        double rateA = getFailureRate(a, b, 'A');
+                        if (rateA > 0) {
+                            int nextA = a - 1;
+                            int nextR = (r == 0) ? 1 : r;
 
-                    if (nextA >= 0 && nextA <= totalA) {
-                        int nextState = system.stateToIndex(nextA, b, nextR);
+                            if (nextA >= 0 && nextA <= totalA) {
+                                int nextState = system.stateToIndex(nextA, b, nextR);
 
-                        if (nextState >= 0 && nextState < numStates) {
-                            Q(currentState, nextState) = rateA;
-                            totalRate += rateA;
+                                if (nextState >= 0 && nextState < numStates) {
+                                    Q(currentState, nextState) = rateA;
+                                    totalRate += rateA;
+                                }
+                            }
+                        }
+                    }
+
+                    if (b > 0) {
+                        double rateB = getFailureRate(a, b, 'B');
+                        if (rateB > 0) {
+                            int nextB = b - 1;
+                            int nextR = (r == 0) ? 2 : r;
+
+                            if (nextB >= 0 && nextB <= totalB) {
+                                int nextState = system.stateToIndex(a, nextB, nextR);
+
+                                if (nextState >= 0 && nextState < numStates) {
+                                    Q(currentState, nextState) = rateB;
+                                    totalRate += rateB;
+                                }
+                            }
                         }
                     }
                 }
 
-                if (b > 0) {
-                    double rateB = getFailureRate(a, b, 'B');
-                    int nextB = b - 1;
-                    int nextR = (r == 0) ? 2 : r;
-
-                    if (nextB >= 0 && nextB <= totalB) {
-                        int nextState = system.stateToIndex(a, nextB, nextR);
-
-                        if (nextState >= 0 && nextState < numStates) {
-                            Q(currentState, nextState) = rateB;
-                            totalRate += rateB;
-                        }
-                    }
-                }
-
+                // Repair transitions are always possible if there are devices to repair
                 if (r > 0) {
                     double repairRate = getRepairRate(a, b, r);
                     int nextA = a + (r == 1 ? 1 : 0);
@@ -103,7 +111,22 @@ void RepairableMarkovModel::buildTransitionMatrix() {
 }
 
 double RepairableMarkovModel::getFailureRate(int a, int b, char deviceType) const {
-    return (deviceType == 'A') ? a * params.lambdaA : b * params.lambdaB;
+    // Only exactly NA devices of type A and NB devices of type B contribute to failure rate
+    if (deviceType == 'A') {
+        // If we have more than NA devices, only NA devices contribute to failure rate
+        if (a <= params.NA) {
+            return a * params.lambdaA;
+        } else {
+            return params.NA * params.lambdaA;
+        }
+    } else {
+        // If we have more than NB devices, only NB devices contribute to failure rate
+        if (b <= params.NB) {
+            return b * params.lambdaB;
+        } else {
+            return params.NB * params.lambdaB;
+        }
+    }
 }
 
 double RepairableMarkovModel::getRepairRate(int a, int b, int r) const {
@@ -272,20 +295,41 @@ Eigen::MatrixXd RepairableMarkovModel::buildGraphTransitionMatrix() const {
             // Суммарная интенсивность выхода из состояния
             double totalOutRate = 0.0;
             
-            // Отказы устройств типа A (переход в состояние с меньшим a)
-            if (a > 0) {
-                int nextGraphIndex = system.stateToGraphIndex(a - 1, b);
-                double rate = a * params.lambdaA;
-                graphQ(currentGraphIndex, nextGraphIndex) += rate;
-                totalOutRate += rate;
-            }
-            
-            // Отказы устройств типа B (переход в состояние с меньшим b)
-            if (b > 0) {
-                int nextGraphIndex = system.stateToGraphIndex(a, b - 1);
-                double rate = b * params.lambdaB;
-                graphQ(currentGraphIndex, nextGraphIndex) += rate;
-                totalOutRate += rate;
+            // Only add failure transitions if the system is operational
+            if (a >= 1 && b >= params.NB) {
+                // Отказы устройств типа A (переход в состояние с меньшим a)
+                if (a > 0) {
+                    int nextGraphIndex = system.stateToGraphIndex(a - 1, b);
+                    // Only exactly NA devices of type A contribute to failure rate
+                    double rate = 0.0;
+                    if (a <= params.NA) {
+                        rate = a * params.lambdaA;
+                    } else {
+                        rate = params.NA * params.lambdaA;
+                    }
+                    
+                    if (rate > 0) {
+                        graphQ(currentGraphIndex, nextGraphIndex) += rate;
+                        totalOutRate += rate;
+                    }
+                }
+                
+                // Отказы устройств типа B (переход в состояние с меньшим b)
+                if (b > 0) {
+                    int nextGraphIndex = system.stateToGraphIndex(a, b - 1);
+                    // Only exactly NB devices of type B contribute to failure rate
+                    double rate = 0.0;
+                    if (b <= params.NB) {
+                        rate = b * params.lambdaB;
+                    } else {
+                        rate = params.NB * params.lambdaB;
+                    }
+                    
+                    if (rate > 0) {
+                        graphQ(currentGraphIndex, nextGraphIndex) += rate;
+                        totalOutRate += rate;
+                    }
+                }
             }
             
             // Ремонт устройств типа A (переход в состояние с большим a)

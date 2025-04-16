@@ -1,74 +1,67 @@
 digraph RepairableStateGraph {
   rankdir=RL;
   node [shape=circle];
-  { rank = same; S7; }
-  { rank = same; S6; S5; }
-  { rank = same; S5; S4; S3; }
-  { rank = same; S3; S2; S1; }
-  { rank = same; S1; S0; S-1; }
-  { rank = same; S-1; S-2; S-3; }
-  { rank = same; S-3; S-4; }
-  { rank = same; S-5; }
-  S7 [label="S7\n(0,0)", style=filled, fillcolor=lightcoral];
-  S6 [label="S6\n(0,1)", style=filled, fillcolor=lightcoral];
-  S5 [label="S5\n(0,2)", style=filled, fillcolor=lightcoral];
-  S5 [label="S5\n(1,0)", style=filled, fillcolor=lightcoral];
-  S4 [label="S4\n(1,1)", style=filled, fillcolor=lightblue];
-  S3 [label="S3\n(1,2)", style=filled, fillcolor=lightblue];
-  S3 [label="S3\n(2,0)", style=filled, fillcolor=lightcoral];
-  S2 [label="S2\n(2,1)", style=filled, fillcolor=lightblue];
-  S1 [label="S1\n(2,2)", style=filled, fillcolor=lightblue];
-  S1 [label="S1\n(3,0)", style=filled, fillcolor=lightcoral];
-  S0 [label="S0\n(3,1)", style=filled, fillcolor=lightblue];
-  S-1 [label="S-1\n(3,2)", style=filled, fillcolor=lightblue];
-  S-1 [label="S-1\n(4,0)", style=filled, fillcolor=lightcoral];
-  S-2 [label="S-2\n(4,1)", style=filled, fillcolor=lightblue];
-  S-3 [label="S-3\n(4,2)", style=filled, fillcolor=lightblue];
-  S-3 [label="S-3\n(5,0)", style=filled, fillcolor=lightcoral];
-  S-4 [label="S-4\n(5,1)", style=filled, fillcolor=lightblue];
-  S-5 [label="S-5\n(5,2)", style=filled, fillcolor=lightblue];
-  S7 -> S5 [label="3.00", style=dashed, color=blue];
+  { rank = same; S17; }
+  { rank = same; S16; S14; }
+  { rank = same; S15; S13; S11; }
+  { rank = same; S12; S10; S8; }
+  { rank = same; S9; S7; S5; }
+  { rank = same; S6; S4; S2; }
+  { rank = same; S3; S1; }
+  { rank = same; S0; }
+  S17 [label="S17\n(0,0)", style=filled, fillcolor=lightcoral];
+  S16 [label="S16\n(0,1)", style=filled, fillcolor=lightcoral];
+  S15 [label="S15\n(0,2)", style=filled, fillcolor=lightcoral];
+  S14 [label="S14\n(1,0)", style=filled, fillcolor=lightcoral];
+  S13 [label="S13\n(1,1)", style=filled, fillcolor=lightblue];
+  S12 [label="S12\n(1,2)", style=filled, fillcolor=lightblue];
+  S11 [label="S11\n(2,0)", style=filled, fillcolor=lightcoral];
+  S10 [label="S10\n(2,1)", style=filled, fillcolor=lightblue];
+  S9 [label="S9\n(2,2)", style=filled, fillcolor=lightblue];
+  S8 [label="S8\n(3,0)", style=filled, fillcolor=lightcoral];
+  S7 [label="S7\n(3,1)", style=filled, fillcolor=lightblue];
+  S6 [label="S6\n(3,2)", style=filled, fillcolor=lightblue];
+  S5 [label="S5\n(4,0)", style=filled, fillcolor=lightcoral];
+  S4 [label="S4\n(4,1)", style=filled, fillcolor=lightblue];
+  S3 [label="S3\n(4,2)", style=filled, fillcolor=lightblue];
+  S2 [label="S2\n(5,0)", style=filled, fillcolor=lightcoral];
+  S1 [label="S1\n(5,1)", style=filled, fillcolor=lightblue];
+  S0 [label="S0\n(5,2)", style=filled, fillcolor=lightblue];
+  S17 -> S14 [label="3.00", style=dashed, color=blue];
+  S16 -> S13 [label="3.00", style=dashed, color=blue];
+  S15 -> S12 [label="3.00", style=dashed, color=blue];
+  S14 -> S11 [label="3.00", style=dashed, color=blue];
+  S13 -> S16 [label="3.00", color=red];
+  S13 -> S14 [label="1.00", color=red];
+  S13 -> S10 [label="3.00", style=dashed, color=blue];
+  S12 -> S15 [label="3.00", color=red];
+  S12 -> S13 [label="1.00", color=red];
+  S12 -> S9 [label="3.00", style=dashed, color=blue];
+  S11 -> S8 [label="3.00", style=dashed, color=blue];
+  S10 -> S13 [label="6.00", color=red];
+  S10 -> S11 [label="1.00", color=red];
+  S10 -> S7 [label="3.00", style=dashed, color=blue];
+  S9 -> S12 [label="6.00", color=red];
+  S9 -> S10 [label="1.00", color=red];
+  S9 -> S6 [label="3.00", style=dashed, color=blue];
+  S8 -> S5 [label="3.00", style=dashed, color=blue];
+  S7 -> S10 [label="9.00", color=red];
+  S7 -> S8 [label="1.00", color=red];
+  S7 -> S4 [label="3.00", style=dashed, color=blue];
+  S6 -> S9 [label="9.00", color=red];
   S6 -> S7 [label="1.00", color=red];
-  S6 -> S4 [label="3.00", style=dashed, color=blue];
-  S5 -> S6 [label="2.00", color=red];
-  S5 -> S3 [label="3.00", style=dashed, color=blue];
-  S5 -> S7 [label="3.00", color=red];
-  S5 -> S3 [label="3.00", style=dashed, color=blue];
-  S4 -> S6 [label="3.00", color=red];
+  S6 -> S3 [label="3.00", style=dashed, color=blue];
+  S5 -> S4 [label="3.00", style=dashed, color=blue];
+  S4 -> S7 [label="9.00", color=red];
   S4 -> S5 [label="1.00", color=red];
-  S4 -> S2 [label="3.00", style=dashed, color=blue];
-  S3 -> S5 [label="3.00", color=red];
-  S3 -> S4 [label="2.00", color=red];
-  S3 -> S1 [label="3.00", style=dashed, color=blue];
-  S3 -> S5 [label="6.00", color=red];
-  S3 -> S1 [label="3.00", style=dashed, color=blue];
-  S2 -> S4 [label="6.00", color=red];
-  S2 -> S3 [label="1.00", color=red];
-  S2 -> S0 [label="3.00", style=dashed, color=blue];
-  S1 -> S3 [label="6.00", color=red];
-  S1 -> S2 [label="2.00", color=red];
-  S1 -> S-1 [label="3.00", style=dashed, color=blue];
-  S1 -> S3 [label="9.00", color=red];
-  S1 -> S-1 [label="3.00", style=dashed, color=blue];
-  S0 -> S2 [label="9.00", color=red];
+  S4 -> S1 [label="3.00", style=dashed, color=blue];
+  S3 -> S6 [label="9.00", color=red];
+  S3 -> S4 [label="1.00", color=red];
+  S3 -> S0 [label="3.00", style=dashed, color=blue];
+  S2 -> S1 [label="3.00", style=dashed, color=blue];
+  S1 -> S4 [label="9.00", color=red];
+  S1 -> S2 [label="1.00", color=red];
+  S1 -> S0 [label="3.00", style=dashed, color=blue];
+  S0 -> S3 [label="9.00", color=red];
   S0 -> S1 [label="1.00", color=red];
-  S0 -> S-2 [label="3.00", style=dashed, color=blue];
-  S-1 -> S1 [label="9.00", color=red];
-  S-1 -> S0 [label="2.00", color=red];
-  S-1 -> S-3 [label="3.00", style=dashed, color=blue];
-  S-1 -> S1 [label="12.00", color=red];
-  S-1 -> S-2 [label="3.00", style=dashed, color=blue];
-  S-2 -> S0 [label="12.00", color=red];
-  S-2 -> S-1 [label="1.00", color=red];
-  S-2 -> S-4 [label="3.00", style=dashed, color=blue];
-  S-3 -> S-1 [label="12.00", color=red];
-  S-3 -> S-2 [label="2.00", color=red];
-  S-3 -> S-5 [label="3.00", style=dashed, color=blue];
-  S-3 -> S-1 [label="15.00", color=red];
-  S-3 -> S-4 [label="3.00", style=dashed, color=blue];
-  S-4 -> S-2 [label="15.00", color=red];
-  S-4 -> S-3 [label="1.00", color=red];
-  S-4 -> S-5 [label="3.00", style=dashed, color=blue];
-  S-5 -> S-3 [label="15.00", color=red];
-  S-5 -> S-4 [label="2.00", color=red];
 }

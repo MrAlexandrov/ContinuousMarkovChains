@@ -34,17 +34,27 @@ void DotGraphGenerator::generateStateGraph(const System& system, const std::stri
     for (int a = 0; a <= totalA; ++a) {
         for (int b = 0; b <= totalB; ++b) {
             int currentIndex = system.stateToIndex(a, b);
+            
+            // Only draw edges from operational states
+            if (a >= 1 && b >= params.NB) {
+                // Only active devices contribute to failure rate
+                if (a > 0) {
+                    int nextIndex = system.stateToIndex(a - 1, b);
+                    // Only exactly NA devices of type A contribute to failure rate
+                    double rate = std::min(a, params.NA) * params.lambdaA;
+                    if (rate > 0) {
+                        dotFile << "  S" << currentIndex << " -> S" << nextIndex << " [label=\"" << std::fixed << std::setprecision(2) << rate << "\"];" << "\n";
+                    }
+                }
 
-            if (a > 0) {
-                int nextIndex = system.stateToIndex(a - 1, b);
-                double rate = a * params.lambdaA;
-                dotFile << "  S" << currentIndex << " -> S" << nextIndex << " [label=\"" << std::fixed << std::setprecision(2) << rate << "\"];" << "\n";
-            }
-
-            if (b > 0) {
-                int nextIndex = system.stateToIndex(a, b - 1);
-                double rate = b * params.lambdaB;
-                dotFile << "  S" << currentIndex << " -> S" << nextIndex << " [label=\"" << std::fixed << std::setprecision(2) << rate << "\"];" << "\n";
+                if (b > 0) {
+                    int nextIndex = system.stateToIndex(a, b - 1);
+                    // Only exactly NB devices of type B contribute to failure rate
+                    double rate = std::min(b, params.NB) * params.lambdaB;
+                    if (rate > 0) {
+                        dotFile << "  S" << currentIndex << " -> S" << nextIndex << " [label=\"" << std::fixed << std::setprecision(2) << rate << "\"];" << "\n";
+                    }
+                }
             }
         }
     }
@@ -81,7 +91,7 @@ void DotGraphGenerator::generateTransitionGraph(const Eigen::MatrixXd& Q, const 
 
     for (int i = 0; i < Q.rows(); ++i) {
         for (int j = 0; j < Q.cols(); ++j) {
-            if (i != j) {
+            if (i != j && Q(i, j) > 0) {
                 dotFile << "  " << i << " -> " << j << " [label=\"" << std::fixed << std::setprecision(2) << Q(i, j) << "\"];" << "\n";
             }
         }
@@ -143,22 +153,31 @@ void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& sys
         for (int b = 0; b <= totalB; ++b) {
             int currentIndex = system.stateToGraphIndex(a, b);
 
-            // Ребра для отказов устройств типа A (красные сплошные)
-            if (a > 0) {
-                int nextIndex = system.stateToGraphIndex(a - 1, b);
-                double rate = a * params.lambdaA;
-                dotFile << "  S" << currentIndex << " -> S" << nextIndex
-                       << " [label=\"" << std::fixed << std::setprecision(2) << rate
-                       << "\", color=red];" << "\n";
-            }
+            // Only draw failure edges from operational states
+            if (a >= 1 && b >= params.NB) {
+                // Ребра для отказов устройств типа A (красные сплошные)
+                if (a > 0) {
+                    int nextIndex = system.stateToGraphIndex(a - 1, b);
+                    // Only exactly NA devices of type A contribute to failure rate
+                    double rate = std::min(a, params.NA) * params.lambdaA;
+                    if (rate > 0) {
+                        dotFile << "  S" << currentIndex << " -> S" << nextIndex
+                               << " [label=\"" << std::fixed << std::setprecision(2) << rate
+                               << "\", color=red];" << "\n";
+                    }
+                }
 
-            // Ребра для отказов устройств типа B (красные сплошные)
-            if (b > 0) {
-                int nextIndex = system.stateToGraphIndex(a, b - 1);
-                double rate = b * params.lambdaB;
-                dotFile << "  S" << currentIndex << " -> S" << nextIndex
-                       << " [label=\"" << std::fixed << std::setprecision(2) << rate
-                       << "\", color=red];" << "\n";
+                // Ребра для отказов устройств типа B (красные сплошные)
+                if (b > 0) {
+                    int nextIndex = system.stateToGraphIndex(a, b - 1);
+                    // Only exactly NB devices of type B contribute to failure rate
+                    double rate = std::min(b, params.NB) * params.lambdaB;
+                    if (rate > 0) {
+                        dotFile << "  S" << currentIndex << " -> S" << nextIndex
+                               << " [label=\"" << std::fixed << std::setprecision(2) << rate
+                               << "\", color=red];" << "\n";
+                    }
+                }
             }
 
             // Добавляем ребра для ремонта (синие пунктирные)
@@ -231,7 +250,7 @@ void DotGraphGenerator::generateRepairableTransitionGraph(const Eigen::MatrixXd&
 
     for (int i = 0; i < Q.rows(); ++i) {
         for (int j = 0; j < Q.cols(); ++j) {
-            if (i != j) {
+            if (i != j && Q(i, j) > 0) {
                 dotFile << "  " << i << " -> " << j << " [label=\"" << std::fixed << std::setprecision(2) << Q(i, j) << "\"];" << "\n";
             }
         }
