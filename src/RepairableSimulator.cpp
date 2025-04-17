@@ -78,7 +78,7 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateMark
                     int repairingB = (params.NB + params.RB) - workingB;
 
                     if (repairingA > repairingB) {
-                        repairStatus = 1
+                        repairStatus = 1;
                     } else if (repairingB > repairingA) {
                         repairStatus = 2;
                     } else if (repairingA > 0) {

@@ -37,7 +37,7 @@ void DotGraphGenerator::generateStateGraph(const System& system, const std::stri
 
             if (a >= 1 && b >= params.NB) {
                 if (a > 0) {
-                    int nextIndex = system.stateToIndex(a - 1, b);s
+                    int nextIndex = system.stateToIndex(a - 1, b);
                     double rate = std::min(a, params.NA) * params.lambdaA;
                     if (rate > 0) {
                         dotFile << "  S" << currentIndex << " -> S" << nextIndex << " [label=\"" << std::fixed << std::setprecision(2) << rate << "\"];" << "\n";
