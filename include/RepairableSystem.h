@@ -35,6 +35,8 @@ public:
     std::tuple<int, int, int> indexToState(int index) const;
 
     int getTotalStates() const;
+    
+    int getAggregatedStates() const;
 
     const RepairableSystemParams& getParams() const;
 

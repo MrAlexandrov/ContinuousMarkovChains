@@ -92,6 +92,13 @@ int RepairableSystem::getTotalStates() const {
     return totalA * totalB * repairStates;
 }
 
+int RepairableSystem::getAggregatedStates() const {
+    int totalA = params.NA + params.RA + 1;
+    int totalB = params.NB + params.RB + 1;
+    
+    return totalA * totalB;  // Без учета состояния ремонта
+}
+
 int RepairableSystem::stateToGraphIndex(int a, int b) const {
     int totalA = params.NA + params.RA + 1;
     int totalB = params.NB + params.RB + 1;

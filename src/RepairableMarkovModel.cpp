@@ -9,13 +9,14 @@ RepairableMarkovModel::RepairableMarkovModel(const RepairableSystemParams& param
     : params(params)
 {
     RepairableSystem system(params);
-    numStates = system.getTotalStates();
+    numStates = system.getAggregatedStates();  // Используем 18 состояний вместо 54
 
     Q = Eigen::MatrixXd::Zero(numStates, numStates);
     initialState = Eigen::VectorXd::Zero(numStates);
 
     auto [totalA, totalB] = system.getMaxDevices();
-    initialState(system.stateToIndex(totalA, totalB, 0)) = 1.0;
+    int aggregatedIndex = totalB * (totalA + 1) + totalA;  // Индекс для агрегированного состояния
+    initialState(aggregatedIndex) = 1.0;
 
     buildTransitionMatrix();
 }
@@ -25,13 +26,14 @@ RepairableMarkovModel::RepairableMarkovModel(double lambdaA, double lambdaB, int
     : params(RepairableSystemParams(lambdaA, lambdaB, NA, NB, RA, RB, lambdaS))
 {
     RepairableSystem system(params);
-    numStates = system.getTotalStates();
+    numStates = system.getAggregatedStates();  // Используем 18 состояний вместо 54
 
     Q = Eigen::MatrixXd::Zero(numStates, numStates);
     initialState = Eigen::VectorXd::Zero(numStates);
 
     auto [totalA, totalB] = system.getMaxDevices();
-    initialState(system.stateToIndex(totalA, totalB, 0)) = 1.0;
+    int aggregatedIndex = totalB * (totalA + 1) + totalA;  // Индекс для агрегированного состояния
+    initialState(aggregatedIndex) = 1.0;
 
     buildTransitionMatrix();
 }
@@ -43,85 +45,113 @@ void RepairableMarkovModel::buildTransitionMatrix() {
     const int totalA = params.NA + params.RA;
     const int totalB = params.NB + params.RB;
 
+    // Строим матрицу переходов для агрегированных состояний (без учета состояния ремонта)
     for (int a = 0; a <= totalA; ++a) {
         for (int b = 0; b <= totalB; ++b) {
-            for (int r = 0; r < 3; ++r) {
-                int currentState = system.stateToIndex(a, b, r);
+            int currentState = b * (totalA + 1) + a;  // Индекс для агрегированного состояния
 
-                if (currentState < 0 || currentState >= numStates) {
-                    continue;
-                }
+            if (currentState < 0 || currentState >= numStates) {
+                continue;
+            }
 
-                double totalRate = 0.0;
+            double totalRate = 0.0;
 
-                if (a >= 1 && b >= params.NB) {
-                    if (a > 0) {
-                        double rateA = getFailureRate(a, b, 'A');
-                        if (rateA > 0) {
-                            int nextA = a - 1;
-                            int nextR = (r == 0) ? 1 : r;
+            // Only add failure transitions if the system is operational
+            if (a >= 1 && b >= params.NB) {
+                // Отказ устройства A
+                if (a > 0) {
+                    double rateA = getFailureRate(a, b, 'A');
+                    if (rateA > 0) {
+                        int nextA = a - 1;
 
-                            if (nextA >= 0 && nextA <= totalA) {
-                                int nextState = system.stateToIndex(nextA, b, nextR);
+                        if (nextA >= 0 && nextA <= totalA) {
+                            int nextState = b * (totalA + 1) + nextA;  // Индекс для агрегированного состояния
 
-                                if (nextState >= 0 && nextState < numStates) {
-                                    Q(currentState, nextState) = rateA;
-                                    totalRate += rateA;
-                                }
-                            }
-                        }
-                    }
-
-                    if (b > 0) {
-                        double rateB = getFailureRate(a, b, 'B');
-                        if (rateB > 0) {
-                            int nextB = b - 1;
-                            int nextR = (r == 0) ? 2 : r;
-
-                            if (nextB >= 0 && nextB <= totalB) {
-                                int nextState = system.stateToIndex(a, nextB, nextR);
-
-                                if (nextState >= 0 && nextState < numStates) {
-                                    Q(currentState, nextState) = rateB;
-                                    totalRate += rateB;
-                                }
+                            if (nextState >= 0 && nextState < numStates) {
+                                Q(currentState, nextState) = rateA;
+                                totalRate += rateA;
                             }
                         }
                     }
                 }
 
-                // Repair transitions are always possible if there are devices to repair
-                if (r > 0) {
-                    double repairRate = getRepairRate(a, b, r);
-                    int nextA = a + (r == 1 ? 1 : 0);
-                    int nextB = b + (r == 2 ? 1 : 0);
+                // Отказ устройства B
+                if (b > 0) {
+                    double rateB = getFailureRate(a, b, 'B');
+                    if (rateB > 0) {
+                        int nextB = b - 1;
 
-                    if (nextA <= totalA && nextB <= totalB) {
-                        int nextR = 0;
-                        int repairingA = totalA - nextA;
-                        int repairingB = totalB - nextB;
+                        if (nextB >= 0 && nextB <= totalB) {
+                            int nextState = nextB * (totalA + 1) + a;  // Индекс для агрегированного состояния
 
-                        if (repairingA > 0 || repairingB > 0) {
-                            if (repairingA > repairingB) {
-                                nextR = 1;
-                            } else if (repairingB > repairingA) {
-                                nextR = 2;
-                            } else if (repairingA > 0) {
-                                nextR = (params.lambdaA >= params.lambdaB) ? 1 : 2;
+                            if (nextState >= 0 && nextState < numStates) {
+                                Q(currentState, nextState) = rateB;
+                                totalRate += rateB;
                             }
                         }
+                    }
+                }
+            }
 
-                        int nextState = system.stateToIndex(nextA, nextB, nextR);
+            // Repair transitions
+            int repairingA = totalA - a;
+            int repairingB = totalB - b;
 
+            if (repairingA > 0 || repairingB > 0) {
+                double repairRate = params.lambdaS;
+                
+                // Определяем, какое устройство ремонтируется
+                if (repairingA > repairingB) {
+                    // Ремонт устройства A
+                    int nextA = a + 1;
+                    if (nextA <= totalA) {
+                        int nextState = b * (totalA + 1) + nextA;  // Индекс для агрегированного состояния
+                        
                         if (nextState >= 0 && nextState < numStates) {
                             Q(currentState, nextState) = repairRate;
                             totalRate += repairRate;
                         }
                     }
+                } else if (repairingB > repairingA) {
+                    // Ремонт устройства B
+                    int nextB = b + 1;
+                    if (nextB <= totalB) {
+                        int nextState = nextB * (totalA + 1) + a;  // Индекс для агрегированного состояния
+                        
+                        if (nextState >= 0 && nextState < numStates) {
+                            Q(currentState, nextState) = repairRate;
+                            totalRate += repairRate;
+                        }
+                    }
+                } else if (repairingA > 0) {
+                    // Если одинаковое количество неисправных устройств, выбираем по интенсивности отказов
+                    if (params.lambdaA >= params.lambdaB) {
+                        // Ремонт устройства A
+                        int nextA = a + 1;
+                        if (nextA <= totalA) {
+                            int nextState = b * (totalA + 1) + nextA;  // Индекс для агрегированного состояния
+                            
+                            if (nextState >= 0 && nextState < numStates) {
+                                Q(currentState, nextState) = repairRate;
+                                totalRate += repairRate;
+                            }
+                        }
+                    } else {
+                        // Ремонт устройства B
+                        int nextB = b + 1;
+                        if (nextB <= totalB) {
+                            int nextState = nextB * (totalA + 1) + a;  // Индекс для агрегированного состояния
+                            
+                            if (nextState >= 0 && nextState < numStates) {
+                                Q(currentState, nextState) = repairRate;
+                                totalRate += repairRate;
+                            }
+                        }
+                    }
                 }
-
-                Q(currentState, currentState) = -totalRate;
             }
+
+            Q(currentState, currentState) = -totalRate;
         }
     }
 }
@@ -258,11 +288,21 @@ std::pair<double, double> RepairableMarkovModel::calculateReadyDevices(const Eig
 double RepairableMarkovModel::calculateRepairUtilization(const Eigen::VectorXd& stateProbs) {
     RepairableSystem system(params);
     double repairUtilization = 0.0;
+    const int totalA = params.NA + params.RA;
+    const int totalB = params.NB + params.RB;
 
-    for (int i = 0; i < numStates; ++i) {
-        auto [a, b, r] = system.indexToState(i);
-        if (r > 0) {
-            repairUtilization += stateProbs(i);
+    // В модели с 18 состояниями ремонтная служба загружена, если есть неисправные устройства
+    for (int a = 0; a <= totalA; ++a) {
+        for (int b = 0; b <= totalB; ++b) {
+            int aggregatedIndex = b * (totalA + 1) + a;
+            
+            // Проверяем, есть ли неисправные устройства
+            int repairingA = totalA - a;
+            int repairingB = totalB - b;
+            
+            if (repairingA > 0 || repairingB > 0) {
+                repairUtilization += stateProbs(aggregatedIndex);
+            }
         }
     }
 
@@ -272,10 +312,14 @@ double RepairableMarkovModel::calculateRepairUtilization(const Eigen::VectorXd& 
 Eigen::VectorXd RepairableMarkovModel::getOperationalStates() const {
     Eigen::VectorXd operationalStates = Eigen::VectorXd::Zero(numStates);
     RepairableSystem system(params);
+    const int totalA = params.NA + params.RA;
+    const int totalB = params.NB + params.RB;
 
-    for (int i = 0; i < numStates; ++i) {
-        auto [a, b, r] = system.indexToState(i);
-        operationalStates(i) = (a >= 1 && b >= params.NB) ? 1.0 : 0.0;
+    for (int a = 0; a <= totalA; ++a) {
+        for (int b = 0; b <= totalB; ++b) {
+            int aggregatedIndex = b * (totalA+1) + a;
+            operationalStates(aggregatedIndex) = (a >= 1 && b >= params.NB) ? 1.0 : 0.0;
+        }
     }
 
     return operationalStates;
