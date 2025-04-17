@@ -28,12 +28,35 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateMark
     std::uniform_real_distribution<double> uniformDist(0.0, 1.0);
 
     while (t < simulationTime) {
+        // Вычисляем интенсивности переходов из текущего состояния
+        double lambdaA = workingA * params.lambdaA;  // Интенсивность отказа устройства A
+        double lambdaB = workingB * params.lambdaB;  // Интенсивность отказа устройства B
+        double lambdaRepair = 0.0;  // Интенсивность ремонта
+        
+        // Определяем, какое устройство ремонтируется в данный момент
         int repairingA = (params.NA + params.RA) - workingA;
         int repairingB = (params.NB + params.RB) - workingB;
-
-        double lambdaA = workingA * params.lambdaA;
-        double lambdaB = workingB * params.lambdaB;
-        double lambdaRepair = (repairStatus > 0) ? params.lambdaS : 0.0;
+        
+        // Если есть устройства для ремонта, определяем интенсивность ремонта
+        if (repairingA > 0 || repairingB > 0) {
+            // Определяем, какое устройство ремонтируется
+            char deviceToRepair = '0';
+            if (repairingA > repairingB) {
+                deviceToRepair = 'A';
+            } else if (repairingB > repairingA) {
+                deviceToRepair = 'B';
+            } else if (repairingA > 0) {
+                deviceToRepair = (params.lambdaA >= params.lambdaB) ? 'A' : 'B';
+            }
+            
+            // Устанавливаем интенсивность ремонта
+            if (deviceToRepair != '0') {
+                lambdaRepair = params.lambdaS;
+                repairStatus = (deviceToRepair == 'A') ? 1 : 2;
+            }
+        } else {
+            repairStatus = 0;
+        }
 
         double totalRate = lambdaA + lambdaB + lambdaRepair;
 
@@ -41,6 +64,7 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateMark
             break;
         }
 
+        // Генерируем время до следующего события
         double timeToNext = expDist(rng) / totalRate;
         t += timeToNext;
 
@@ -48,55 +72,28 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateMark
             break;
         }
 
+        // Определяем, какое событие произошло
         double randomValue = uniformDist(rng);
         double cumulativeProb = lambdaA / totalRate;
 
         if (randomValue < cumulativeProb) {
+            // Отказ устройства A
             if (workingA > 0) {
                 workingA--;
-                if (repairStatus == 0) {
-                    repairStatus = 1;
-                }
             }
         } else {
             cumulativeProb += lambdaB / totalRate;
             if (randomValue < cumulativeProb) {
+                // Отказ устройства B
                 if (workingB > 0) {
                     workingB--;
-
-                    if (repairStatus == 0) {
-                        repairStatus = 2;
-                    }
                 }
             } else {
-                if (repairStatus == 1) {
+                // Ремонт устройства
+                if (repairStatus == 1 && repairingA > 0) {
                     workingA++;
-                    repairStatus = 0;
-
-                    int repairingA = (params.NA + params.RA) - workingA;
-                    int repairingB = (params.NB + params.RB) - workingB;
-
-                    if (repairingA > repairingB) {
-                        repairStatus = 1;
-                    } else if (repairingB > repairingA) {
-                        repairStatus = 2;
-                    } else if (repairingA > 0) {
-                        repairStatus = (params.lambdaA >= params.lambdaB) ? 1 : 2;
-                    }
-                } else if (repairStatus == 2) {
+                } else if (repairStatus == 2 && repairingB > 0) {
                     workingB++;
-                    repairStatus = 0;
-
-                    int repairingA = (params.NA + params.RA) - workingA;
-                    int repairingB = (params.NB + params.RB) - workingB;
-
-                    if (repairingA > repairingB) {
-                        repairStatus = 1;
-                    } else if (repairingB > repairingA) {
-                        repairStatus = 2;
-                    } else if (repairingA > 0) {
-                        repairStatus = (params.lambdaA >= params.lambdaB) ? 1 : 2;
-                    }
                 }
             }
         }
@@ -118,20 +115,18 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateDisc
 
     std::priority_queue<Event, std::vector<Event>, std::greater<Event>> events;
 
-    std::exponential_distribution<double> expDistA(params.lambdaA);
-    std::exponential_distribution<double> expDistB(params.lambdaB);
-    std::exponential_distribution<double> expDistRepair(params.lambdaS);
-
+    // Планируем начальные события отказов для всех работающих устройств
     for (int i = 0; i < workingA; ++i) {
-        double failureTime = expDistA(rng);
+        double failureTime = std::exponential_distribution<double>(params.lambdaA)(rng);
         events.push(Event(failureTime, EventType::DEVICE_FAILURE_A));
     }
 
     for (int i = 0; i < workingB; ++i) {
-        double failureTime = expDistB(rng);
+        double failureTime = std::exponential_distribution<double>(params.lambdaB)(rng);
         events.push(Event(failureTime, EventType::DEVICE_FAILURE_B));
     }
 
+    // Планируем событие окончания симуляции
     events.push(Event(simulationTime, EventType::SIMULATION_END));
 
     double currentTime = 0.0;
@@ -146,17 +141,56 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateDisc
             break;
         }
 
+        // Определяем, какое устройство ремонтируется в данный момент
+        int repairingA = (params.NA + params.RA) - workingA;
+        int repairingB = (params.NB + params.RB) - workingB;
+        
+        // Если есть устройства для ремонта, определяем, какое ремонтируется
+        if (repairingA > 0 || repairingB > 0) {
+            if (repairingA > repairingB) {
+                repairStatus = 1;  // Ремонт устройства A
+            } else if (repairingB > repairingA) {
+                repairStatus = 2;  // Ремонт устройства B
+            } else if (repairingA > 0) {
+                repairStatus = (params.lambdaA >= params.lambdaB) ? 1 : 2;
+            }
+            
+            // Если еще не запланировано событие ремонта, планируем его
+            bool repairEventExists = false;
+            std::priority_queue<Event, std::vector<Event>, std::greater<Event>> tempEvents;
+            
+            while (!events.empty()) {
+                Event event = events.top();
+                events.pop();
+                
+                if (event.type == EventType::DEVICE_REPAIR) {
+                    repairEventExists = true;
+                }
+                
+                tempEvents.push(event);
+            }
+            
+            events = tempEvents;
+            
+            if (!repairEventExists && repairStatus > 0) {
+                double repairTime = currentTime + std::exponential_distribution<double>(params.lambdaS)(rng);
+                events.push(Event(repairTime, EventType::DEVICE_REPAIR));
+            }
+        } else {
+            repairStatus = 0;
+        }
+
         switch (nextEvent.type) {
         case EventType::DEVICE_FAILURE_A:
             if (workingA > 0) {
                 workingA--;
-
-                if (repairStatus == 0) {
-                    repairStatus = 1;
-                    double repairTime = currentTime + expDistRepair(rng);
-                    events.push(Event(repairTime, EventType::DEVICE_REPAIR));
+                
+                // Планируем следующий отказ для оставшихся устройств A
+                if (workingA > 0) {
+                    double nextFailureTime = currentTime + std::exponential_distribution<double>(params.lambdaA)(rng);
+                    events.push(Event(nextFailureTime, EventType::DEVICE_FAILURE_A));
                 }
-
+                
                 trajectory.push_back(std::make_tuple(currentTime, workingA, workingB, repairStatus));
             }
             break;
@@ -164,67 +198,54 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateDisc
         case EventType::DEVICE_FAILURE_B:
             if (workingB > 0) {
                 workingB--;
-
-                if (repairStatus == 0) {
-                    repairStatus = 2;
-                    double repairTime = currentTime + expDistRepair(rng);
-                    events.push(Event(repairTime, EventType::DEVICE_REPAIR));
+                
+                // Планируем следующий отказ для оставшихся устройств B
+                if (workingB > 0) {
+                    double nextFailureTime = currentTime + std::exponential_distribution<double>(params.lambdaB)(rng);
+                    events.push(Event(nextFailureTime, EventType::DEVICE_FAILURE_B));
                 }
-
+                
                 trajectory.push_back(std::make_tuple(currentTime, workingA, workingB, repairStatus));
             }
             break;
 
         case EventType::DEVICE_REPAIR:
             {
-                if (repairStatus == 1) {
+                if (repairStatus == 1 && repairingA > 0) {
                     workingA++;
-                    int repairingA = (params.NA + params.RA) - workingA;
-                    int repairingB = (params.NB + params.RB) - workingB;
-
-                    if (repairingA > 0 || repairingB > 0) {
-                        if (repairingA > repairingB) {
-                            repairStatus = 1;
-                        } else if (repairingB > repairingA) {
-                            repairStatus = 2;
-                        } else {
-                            repairStatus = (params.lambdaA >= params.lambdaB) ? 1 : 2;
-                        }
-
-                        double repairTime = currentTime + expDistRepair(rng);
-                        events.push(Event(repairTime, EventType::DEVICE_REPAIR));
-                    } else {
-                        repairStatus = 0;
-                    }
-                } else if (repairStatus == 2) {
+                    
+                    // Планируем отказ для отремонтированного устройства A
+                    double nextFailureTime = currentTime + std::exponential_distribution<double>(params.lambdaA)(rng);
+                    events.push(Event(nextFailureTime, EventType::DEVICE_FAILURE_A));
+                    
+                } else if (repairStatus == 2 && repairingB > 0) {
                     workingB++;
-                    int repairingA = (params.NA + params.RA) - workingA;
-                    int repairingB = (params.NB + params.RB) - workingB;
-
-                    if (repairingA > 0 || repairingB > 0) {
-                        if (repairingA > repairingB) {
-                            repairStatus = 1;
-                        } else if (repairingB > repairingA) {
-                            repairStatus = 2;
-                        } else {
-                            repairStatus = (params.lambdaA >= params.lambdaB) ? 1 : 2;
-                        }
-
-                        double repairTime = currentTime + expDistRepair(rng);
-                        events.push(Event(repairTime, EventType::DEVICE_REPAIR));
+                    
+                    // Планируем отказ для отремонтированного устройства B
+                    double nextFailureTime = currentTime + std::exponential_distribution<double>(params.lambdaB)(rng);
+                    events.push(Event(nextFailureTime, EventType::DEVICE_FAILURE_B));
+                }
+                
+                // Обновляем количество ремонтируемых устройств
+                repairingA = (params.NA + params.RA) - workingA;
+                repairingB = (params.NB + params.RB) - workingB;
+                
+                // Если еще есть устройства для ремонта, планируем следующий ремонт
+                if (repairingA > 0 || repairingB > 0) {
+                    if (repairingA > repairingB) {
+                        repairStatus = 1;
+                    } else if (repairingB > repairingA) {
+                        repairStatus = 2;
                     } else {
-                        repairStatus = 0;
+                        repairStatus = (params.lambdaA >= params.lambdaB) ? 1 : 2;
                     }
+                    
+                    double nextRepairTime = currentTime + std::exponential_distribution<double>(params.lambdaS)(rng);
+                    events.push(Event(nextRepairTime, EventType::DEVICE_REPAIR));
+                } else {
+                    repairStatus = 0;
                 }
-
-                if (repairStatus == 1) {
-                    double failureTime = currentTime + expDistA(rng);
-                    events.push(Event(failureTime, EventType::DEVICE_FAILURE_A));
-                } else if (repairStatus == 2) {
-                    double failureTime = currentTime + expDistB(rng);
-                    events.push(Event(failureTime, EventType::DEVICE_FAILURE_B));
-                }
-
+                
                 trajectory.push_back(std::make_tuple(currentTime, workingA, workingB, repairStatus));
             }
             break;

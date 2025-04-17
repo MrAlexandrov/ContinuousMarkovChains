@@ -195,7 +195,23 @@ void runTask2(int N, int G) {
     Separate(4);
     std::cout << "Расчет предельных вероятностей состояний системы:" << "\n";
     Eigen::VectorXd steadyStateProbs = model.solveSteadyStateEquations();
-    std::cout << "Предельные вероятности рассчитаны" << "\n";
+    
+    // Агрегируем предельные вероятности по состояниям (a,b), игнорируя состояние ремонта
+    Eigen::VectorXd aggregatedProbs = model.getAggregatedStateProbabilities(steadyStateProbs);
+    
+    std::cout << "Предельные вероятности рассчитаны (18 состояний):" << "\n";
+    
+    const int totalA = params.NA + params.RA + 1;
+    const int totalB = params.NB + params.RB + 1;
+    
+    for (int a = 0; a < totalA; ++a) {
+        for (int b = 0; b < totalB; ++b) {
+            int aggregatedIndex = b * totalA + a;
+            if (aggregatedProbs(aggregatedIndex) > 0.001) {  // Выводим только значимые вероятности
+                std::cout << "P(" << a << "," << b << ") = " << aggregatedProbs(aggregatedIndex) << "\n";
+            }
+        }
+    }
 
     Separate(5);
     std::cout << "Расчет математических ожиданий прикладных характеристик системы:" << "\n";
