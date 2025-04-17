@@ -20,7 +20,7 @@ public:
     static void plotTrajectories(const std::vector<std::vector<std::pair<double, int>>>& trajectories, const std::string& outputPrefix = "state_trajectories");
 
     // Second task
-    static void plotRepairableStates(const Eigen::VectorXd& times, const Eigen::MatrixXd& probabilities, const std::string& outputPrefix = "repairable_states");
+    // static void plotRepairableStates(const Eigen::VectorXd& times, const Eigen::MatrixXd& probabilities, const std::string& outputPrefix = "repairable_states");
 
     static void plotRepairableTrajectory(const std::vector<std::tuple<double, int, int, int>>& trajectory, const std::string& outputPrefix = "repairable_trajectory");
 

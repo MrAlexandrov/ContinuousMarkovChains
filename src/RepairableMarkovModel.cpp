@@ -54,9 +54,7 @@ void RepairableMarkovModel::buildTransitionMatrix() {
 
                 double totalRate = 0.0;
 
-                // Only add failure transitions if the system is operational
                 if (a >= 1 && b >= params.NB) {
-                    // Отказ устройства A
                     if (a > 0) {
                         double rateA = getFailureRate(a, b, 'A');
                         if (rateA > 0) {

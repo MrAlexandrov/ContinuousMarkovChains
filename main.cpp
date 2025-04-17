@@ -181,18 +181,16 @@ void runTask2(int N, int G) {
     Separate(2);
     std::cout << "Построение матрицы интенсивностей переходов ремонтируемой системы:" << "\n";
     RepairableMarkovModel model(params);
-    model.buildTransitionMatrix();
-    saveMatrix(model.getTransitionMatrix(), "transition_matrix_task2.dat");
 
     Eigen::MatrixXd graphQ = model.buildGraphTransitionMatrix();
-    saveMatrix(graphQ, "graph_transition_matrix_task2.dat");
+    saveMatrix(graphQ, "transition_matrix_task2.dat");
 
-    std::cout << "Матрица переходов сохранена в файлах transition_matrix_task2.dat и graph_transition_matrix_task2.dat" << "\n";
+    std::cout << "Матрица переходов сохранена в файл transition_matrix_task2.dat" << "\n";
 
     Separate(3);
     std::cout << "Запись алгебраических уравнений Колмогорова для установившегося режима:" << "\n";
-    std::cout << "Q^T * π = 0, где π - вектор предельных вероятностей" << "\n";
-    std::cout << "Σπ_i = 1 (условие нормировки)" << "\n";
+    std::cout << "Q^T * \\pi = 0, где \\pi - вектор предельных вероятностей" << "\n";
+    std::cout << "\\sum\\pi_i = 1 (условие нормировки)" << "\n";
 
     Separate(4);
     std::cout << "Расчет предельных вероятностей состояний системы:" << "\n";

@@ -10,8 +10,10 @@ void GnuplotPlotter::plotAggregatedStates(
     const RepairableMarkovModel& model,
     const std::string& outputPrefix) {
 
+    constexpr int AMOUNT = 18;
+
     // Get aggregated probabilities
-    Eigen::MatrixXd aggregatedProbs(18, probabilities.cols());
+    Eigen::MatrixXd aggregatedProbs(AMOUNT, probabilities.cols());
     for (int t = 0; t < probabilities.cols(); ++t) {
         aggregatedProbs.col(t) = model.getAggregatedStateProbabilities(probabilities.col(t));
     }
@@ -27,14 +29,14 @@ void GnuplotPlotter::plotAggregatedStates(
 
     std::ofstream datafile(outputPrefix + ".dat");
     datafile << "#Time ";
-    for (int i = 0; i < 18; ++i) {
+    for (int i = 0; i < AMOUNT; ++i) {
         datafile << "State" << i << " ";
     }
     datafile << "\n";
 
     for (int t = 0; t < times.size(); ++t) {
         datafile << times(t) << " ";
-        for (int i = 0; i < 18; ++i) {
+        for (int i = 0; i < AMOUNT; ++i) {
             datafile << aggregatedProbs(i, t) << " ";
         }
         datafile << "\n";
@@ -42,7 +44,7 @@ void GnuplotPlotter::plotAggregatedStates(
     datafile.close();
 
     script << "plot ";
-    for (int i = 0; i < 18; ++i) {
+    for (int i = 0; i < AMOUNT; ++i) {
         if (i > 0) script << ", ";
         script << "'" << outputPrefix << ".dat' using 1:" << (i+2)
                << " with lines title 'State " << i << "'";

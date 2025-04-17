@@ -64,44 +64,6 @@ void DotGraphGenerator::generateStateGraph(const System& system, const std::stri
     std::cout << "Граф состояний сохранен в файлах " << filename << ".dot и " << filename << ".png" << "\n";
 }
 
-void DotGraphGenerator::generateTransitionGraph(const Eigen::MatrixXd& Q, const SystemParams& params, const std::string& filename) {
-    System system(params);
-    std::ofstream dotFile(filename + ".dot");
-
-    dotFile << "digraph TransitionGraph {" << "\n";
-    dotFile << "  rankdir=LR;" << "\n";
-    dotFile << "  node [shape=circle];" << "\n";
-
-    for (int i = 0; i < Q.rows(); i++) {
-        auto [a, b] = system.indexToState(i);
-
-        std::string nodeStyle;
-        if (a >= 1 && b >= params.NB) {
-            nodeStyle = "style=filled, fillcolor=lightblue";
-        } else {
-            nodeStyle = "style=filled, fillcolor=lightcoral";
-        }
-
-        dotFile << "  " << i << " [label=\"S" << i << "\\n(" << a << "," << b << ")\", " << nodeStyle << "];" << "\n";
-    }
-
-    for (int i = 0; i < Q.rows(); ++i) {
-        for (int j = 0; j < Q.cols(); ++j) {
-            if (i != j && Q(i, j) > 0) {
-                dotFile << "  " << i << " -> " << j << " [label=\"" << std::fixed << std::setprecision(2) << Q(i, j) << "\"];" << "\n";
-            }
-        }
-    }
-
-    dotFile << "}" << "\n";
-    dotFile.close();
-
-    std::string command = "dot -Tpng " + filename + ".dot -o " + filename + ".png";
-    ::system(command.c_str());
-
-    std::cout << "Граф переходов сохранен в файлах " << filename << ".dot и " << filename << ".png" << "\n";
-}
-
 void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& system, const std::string& filename) {
     const RepairableSystemParams& params = system.getParams();
     std::ofstream dotFile(filename + ".dot");
@@ -197,51 +159,4 @@ void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& sys
     ::system(command.c_str());
 
     std::cout << "Граф состояний ремонтируемой системы сохранен в файлах " << filename << ".dot и " << filename << ".png" << "\n";
-}
-
-void DotGraphGenerator::generateRepairableTransitionGraph(const Eigen::MatrixXd& Q, const RepairableSystemParams& params, const std::string& filename) {
-    RepairableSystem system(params);
-    std::ofstream dotFile(filename + ".dot");
-
-    dotFile << "digraph RepairableTransitionGraph {" << "\n";
-    dotFile << "  rankdir=LR;" << "\n";
-    dotFile << "  node [shape=circle];" << "\n";
-
-    for (int i = 0; i < Q.rows(); i++) {
-        auto [a, b, r] = system.indexToState(i);
-
-        std::string nodeStyle;
-        if (a >= 1 && b >= params.NB) {
-            nodeStyle = "style=filled, fillcolor=lightblue";
-        } else {
-            nodeStyle = "style=filled, fillcolor=lightcoral";
-        }
-
-        std::string repairStatus;
-        if (r == 0) {
-            repairStatus = "нет ремонта";
-        } else if (r == 1) {
-            repairStatus = "ремонт A";
-        } else {
-            repairStatus = "ремонт B";
-        }
-
-        dotFile << "  " << i << " [label=\"S" << i << "\\n(" << a << "," << b << "," << r << ")\\n" << repairStatus << "\", " << nodeStyle << "];" << "\n";
-    }
-
-    for (int i = 0; i < Q.rows(); ++i) {
-        for (int j = 0; j < Q.cols(); ++j) {
-            if (i != j && Q(i, j) > 0) {
-                dotFile << "  " << i << " -> " << j << " [label=\"" << std::fixed << std::setprecision(2) << Q(i, j) << "\"];" << "\n";
-            }
-        }
-    }
-
-    dotFile << "}" << "\n";
-    dotFile.close();
-
-    std::string command = "dot -Tpng " + filename + ".dot -o " + filename + ".png";
-    ::system(command.c_str());
-
-    std::cout << "Граф переходов ремонтируемой системы сохранен в файлах " << filename << ".dot и " << filename << ".png" << "\n";
 }
