@@ -55,10 +55,34 @@ void runTask1(int N, int G) {
     std::cout << "График функции надежности сохранен в файл reliability_function_task1.png" << std::endl;
 
     Simulator simulator(params);
-    auto [meanTime, stdDev] = simulator.simulateMultipleRuns(100);
+    
+    // Получаем времена отказов из 100 экспериментов
+    std::vector<double> failureTimes;
+    failureTimes.reserve(100);
+    for (int i = 0; i < 100; ++i) {
+        failureTimes.push_back(simulator.simulateSingleRun());
+    }
+    
+    // Вычисляем среднее и стандартное отклонение
+    double sum = 0.0;
+    for (double time : failureTimes) {
+        sum += time;
+    }
+    double meanTime = sum / failureTimes.size();
+    
+    double variance = 0.0;
+    for (double time : failureTimes) {
+        variance += (time - meanTime) * (time - meanTime);
+    }
+    variance /= failureTimes.size();
+    double stdDev = std::sqrt(variance);
 
     std::cout << "MTTF (имитационный): " << meanTime << "\n";
     std::cout << "Стандартное отклонение: " << stdDev << "\n";
+    
+    // Строим гистограмму времен отказов
+    GnuplotPlotter::plotHistogram(failureTimes, "Распределение времени безотказной работы", "failure_times_histogram_task1");
+    std::cout << "Гистограмма времен отказов сохранена в файл failure_times_histogram_task1.png" << std::endl;
 
     std::vector<std::vector<std::pair<double, int>>> trajectories;
     trajectories.reserve(10);
