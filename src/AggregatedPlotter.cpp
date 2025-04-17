@@ -5,11 +5,11 @@
 #include <sstream>
 
 void GnuplotPlotter::plotAggregatedStates(
-    const Eigen::VectorXd& times, 
+    const Eigen::VectorXd& times,
     const Eigen::MatrixXd& probabilities,
     const RepairableMarkovModel& model,
     const std::string& outputPrefix) {
-    
+
     // Get aggregated probabilities
     Eigen::MatrixXd aggregatedProbs(18, probabilities.cols());
     for (int t = 0; t < probabilities.cols(); ++t) {
@@ -20,7 +20,7 @@ void GnuplotPlotter::plotAggregatedStates(
     script << "set terminal png size 1200,800\n";
     script << "set output '" << outputPrefix << ".png'\n";
     script << "set title 'Aggregated State Probabilities (18 states)'\n";
-    script << "set xlabel 'Time'\n"; 
+    script << "set xlabel 'Time'\n";
     script << "set ylabel 'Probability'\n";
     script << "set grid\n";
     script << "set key outside\n";
@@ -44,7 +44,7 @@ void GnuplotPlotter::plotAggregatedStates(
     script << "plot ";
     for (int i = 0; i < 18; ++i) {
         if (i > 0) script << ", ";
-        script << "'" << outputPrefix << ".dat' using 1:" << (i+2) 
+        script << "'" << outputPrefix << ".dat' using 1:" << (i+2)
                << " with lines title 'State " << i << "'";
     }
     script << "\n";

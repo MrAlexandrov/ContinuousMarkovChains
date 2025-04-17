@@ -786,11 +786,11 @@ axis.handleClick( formName, displayOpts );
 
 }%
 \endgroup
-\begingroup 
-\catcode`\<=12 
-\catcode`\>=12 
+\begingroup
+\catcode`\<=12
+\catcode`\>=12
 \ccpdftex%
 \input{dljscc.def}%
 \immediate\pdfobj{ << /S/JavaScript/JS(\dljspgfplotsJSiii) >> }
 \xdef\objpgfplotsJSiii{\the\pdflastobj\space0 R}
-\endgroup 
+\endgroup

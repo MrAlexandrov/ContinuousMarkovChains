@@ -125,10 +125,9 @@ void GnuplotPlotter::plotTrajectories(
 #include "RepairableMarkovModel.h"
 
 void GnuplotPlotter::plotRepairableStates(const Eigen::VectorXd& times, const Eigen::MatrixXd& probabilities, const std::string& outputPrefix) {
-    // First create aggregated probabilities (sum over repair states)
     Eigen::MatrixXd aggregatedProbs(18, probabilities.cols());
-    RepairableMarkovModel model(RepairableSystemParams(0,0)); // Temporary for aggregation
-    
+    RepairableMarkovModel model(RepairableSystemParams(0,0));
+
     for (int t = 0; t < probabilities.cols(); ++t) {
         aggregatedProbs.col(t) = model.getAggregatedStateProbabilities(probabilities.col(t));
     }

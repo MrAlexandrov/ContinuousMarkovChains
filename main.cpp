@@ -16,7 +16,6 @@
 
 namespace {
 
-// Функция для вычисления среднего значения вектора
 double calculateMean(const std::vector<double>& values) {
     if (values.empty()) {
         return 0.0;
@@ -29,7 +28,6 @@ double calculateMean(const std::vector<double>& values) {
     return sum / values.size();
 }
 
-// Функция для вычисления стандартного отклонения вектора
 double calculateStandardDeviation(const std::vector<double>& values, double mean) {
     if (values.empty() || values.size() == 1) {
         return 0.0;
@@ -43,7 +41,6 @@ double calculateStandardDeviation(const std::vector<double>& values, double mean
     return std::sqrt(variance);
 }
 
-// Функция для проведения имитационного моделирования и сбора статистики
 std::vector<double> runSimulation(Simulator& simulator, int numRuns) {
     std::vector<double> failureTimes;
     failureTimes.reserve(numRuns);
@@ -55,14 +52,11 @@ std::vector<double> runSimulation(Simulator& simulator, int numRuns) {
     return failureTimes;
 }
 
-// Функция для визуализации результатов имитационного моделирования
 void visualizeSimulationResults(const std::vector<double>& failureTimes, const std::string& histogramTitle, const std::string& outputPrefix) {
-    // Строим гистограмму времен отказов
     GnuplotPlotter::plotHistogram(failureTimes, histogramTitle, outputPrefix);
-    std::cout << "Гистограмма времен отказов сохранена в файл " << outputPrefix << ".png" << std::endl;
+    std::cout << "Гистограмма времен отказов сохранена в файл " << outputPrefix << ".png" << "\n";
 }
 
-// Функция для генерации и визуализации траекторий системы
 void generateAndVisualizeTrajectories(Simulator& simulator, int numTrajectories, const std::string& outputPrefix) {
     std::vector<std::vector<std::pair<double, int>>> trajectories;
     trajectories.reserve(numTrajectories);
@@ -72,10 +66,9 @@ void generateAndVisualizeTrajectories(Simulator& simulator, int numTrajectories,
     }
 
     GnuplotPlotter::plotTrajectories(trajectories, outputPrefix);
-    std::cout << "График траекторий сохранен в файл " << outputPrefix << ".png" << std::endl;
+    std::cout << "График траекторий сохранен в файл " << outputPrefix << ".png" << "\n";
 }
 
-// Структура для хранения статистических характеристик
 struct SimulationStats {
     double mean;
     double stdDev;
@@ -83,7 +76,6 @@ struct SimulationStats {
     SimulationStats(double m, double s) : mean(m), stdDev(s) {}
 };
 
-// Функция для вычисления и вывода статистических характеристик
 SimulationStats calculateAndPrintStats(const std::vector<double>& failureTimes) {
     double mean = calculateMean(failureTimes);
     double stdDev = calculateStandardDeviation(failureTimes, mean);
@@ -140,13 +132,13 @@ void runTask1(int N, int G) {
     Separate(5);
     std::cout << "Построение графиков вероятностей состояний:" << "\n";
     GnuplotPlotter::plotStatesProbabilities(times, probabilities, "states_probabilities_task1");
-    std::cout << "График вероятностей состояний сохранен в файл states_probabilities_task1.png" << std::endl;
+    std::cout << "График вероятностей состояний сохранен в файл states_probabilities_task1.png" << "\n";
 
     Separate(6);
     std::cout << "Построение графика функции надежности:" << "\n";
     Eigen::VectorXd reliability = model.getReliabilityFunction(probabilities);
     GnuplotPlotter::plotReliabilityFunction(times, reliability, "reliability_function_task1");
-    std::cout << "График функции надежности сохранен в файл reliability_function_task1.png" << std::endl;
+    std::cout << "График функции надежности сохранен в файл reliability_function_task1.png" << "\n";
 
     Separate(7);
     std::cout << "Расчет математического ожидания времени безотказной работы:" << "\n";
@@ -157,17 +149,13 @@ void runTask1(int N, int G) {
     std::cout << "Имитационное моделирование системы:" << "\n";
     Simulator simulator(params);
 
-    // Проводим имитационное моделирование (100 экспериментов)
     const int numSimulations = 100;
     std::vector<double> failureTimes = runSimulation(simulator, numSimulations);
 
-    // Вычисляем и выводим статистические характеристики
     SimulationStats stats = calculateAndPrintStats(failureTimes);
 
-    // Визуализируем результаты
     visualizeSimulationResults(failureTimes, "Распределение времени безотказной работы", "failure_times_histogram_task1");
 
-    // Генерируем и визуализируем 10 траекторий системы (дополнительно)
     generateAndVisualizeTrajectories(simulator, 10, "state_trajectories_task1");
 }
 
@@ -188,7 +176,7 @@ void runTask2(int N, int G) {
     std::cout << "Построение графа состояний ремонтируемой системы:" << "\n";
     RepairableSystem system(params);
     DotGraphGenerator::generateRepairableStateGraph(system, "state_graph_task2");
-    std::cout << "Граф состояний сохранен в файлах state_graph_task2.dot и state_graph_task2.png" << std::endl;
+    std::cout << "Граф состояний сохранен в файлах state_graph_task2.dot и state_graph_task2.png" << "\n";
 
 
     Separate(2);
@@ -197,11 +185,10 @@ void runTask2(int N, int G) {
     model.buildTransitionMatrix();
     saveMatrix(model.getTransitionMatrix(), "transition_matrix_task2.dat");
 
-    // Создаем и сохраняем матрицу переходов в формате графа состояний
     Eigen::MatrixXd graphQ = model.buildGraphTransitionMatrix();
     saveMatrix(graphQ, "graph_transition_matrix_task2.dat");
 
-    std::cout << "Матрица переходов сохранена в файлах transition_matrix_task2.dat и graph_transition_matrix_task2.dat" << std::endl;
+    std::cout << "Матрица переходов сохранена в файлах transition_matrix_task2.dat и graph_transition_matrix_task2.dat" << "\n";
 
     Separate(3);
     std::cout << "Запись алгебраических уравнений Колмогорова для установившегося режима:" << "\n";
@@ -210,21 +197,19 @@ void runTask2(int N, int G) {
 
     Separate(4);
     std::cout << "Расчет предельных вероятностей состояний системы:" << "\n";
-    // Решаем стационарные уравнения Колмогорова
     Eigen::VectorXd steadyStateProbs = model.solveSteadyStateEquations();
     std::cout << "Предельные вероятности рассчитаны" << "\n";
 
     Separate(5);
-    std::cout << "Расчет математических ожиданий прикладных характеристик системы:" << std::endl;
-    // Вычисляем характеристики системы
+    std::cout << "Расчет математических ожиданий прикладных характеристик системы:" << "\n";
     double failureProb = model.calculateFailureProbability(steadyStateProbs);
     auto [avgA, avgB] = model.calculateReadyDevices(steadyStateProbs);
     double repairUtil = model.calculateRepairUtilization(steadyStateProbs);
 
-    std::cout << "Вероятность отказа системы: " << failureProb << std::endl;
-    std::cout << "Среднее число готовых устройств типа A: " << avgA << std::endl;
-    std::cout << "Среднее число готовых устройств типа B: " << avgB << std::endl;
-    std::cout << "Коэффициент загрузки ремонтной службы: " << repairUtil << std::endl;
+    std::cout << "Вероятность отказа системы: " << failureProb << "\n";
+    std::cout << "Среднее число готовых устройств типа A: " << avgA << "\n";
+    std::cout << "Среднее число готовых устройств типа B: " << avgB << "\n";
+    std::cout << "Коэффициент загрузки ремонтной службы: " << repairUtil << "\n";
 
     Separate(6);
     std::cout << "Запись дифференциальных уравнений Колмогорова:" << "\n";
@@ -234,7 +219,7 @@ void runTask2(int N, int G) {
     std::cout << "Решение системы дифференциальных уравнений:" << "\n";
     // Оценка времени переходного процесса
     double transientTime = model.estimateTransientTime(steadyStateProbs);
-    std::cout << "Оценка времени переходного процесса: " << transientTime << std::endl;
+    std::cout << "Оценка времени переходного процесса: " << transientTime << "\n";
 
     // Решаем нестационарные уравнения Колмогорова (переходный процесс)
     double modelingTime = 2 * transientTime;  // Время моделирования вдвое больше времени переходного процесса
@@ -243,7 +228,7 @@ void runTask2(int N, int G) {
     Separate(8);
     std::cout << "Построение графиков вероятностей состояний:" << "\n";
     GnuplotPlotter::plotAggregatedStates(times, probabilities, model, "states_probabilities_task2");
-    std::cout << "График агрегированных вероятностей состояний (18 состояний) сохранен в файл states_probabilities_task2.png" << std::endl;
+    std::cout << "График агрегированных вероятностей состояний (18 состояний) сохранен в файл states_probabilities_task2.png" << "\n";
 
     Separate(9);
     std::cout << "Имитационное моделирование в терминах непрерывных марковских цепей:" << "\n";
@@ -267,7 +252,7 @@ void runTask2(int N, int G) {
 
     if (!markovTrajectory.empty()) {
         GnuplotPlotter::plotRepairableTrajectory(markovTrajectory, "repairable_markov_chain_trajectory");
-        std::cout << "График траектории марковского процесса сохранен в файл repairable_markov_chain_trajectory.png" << std::endl;
+        std::cout << "График траектории марковского процесса сохранен в файл repairable_markov_chain_trajectory.png" << "\n";
     }
 
     Separate(10);
@@ -288,7 +273,7 @@ void runTask2(int N, int G) {
 
     if (!discreteTrajectory.empty()) {
         GnuplotPlotter::plotRepairableTrajectory(discreteTrajectory, "repairable_discrete_event_trajectory");
-        std::cout << "График траектории дискретно-событийного процесса сохранен в файл repairable_discrete_event_trajectory.png" << std::endl;
+        std::cout << "График траектории дискретно-событийного процесса сохранен в файл repairable_discrete_event_trajectory.png" << "\n";
     }
 }
 
@@ -300,11 +285,6 @@ int main() {
 
     std::string taskChoice;
     std::cin >> taskChoice;
-    // std::ifstream input("input.txt");
-    // std::getline(input, taskChoice);
-    // input.close();
-
-    std::cout << "Выбрана опция: " << taskChoice << std::endl;
 
     if (taskChoice == "1") {
         runTask1(N, G);
@@ -314,7 +294,6 @@ int main() {
         runTask1(N, G);
         runTask2(N, G);
     } else {
-        std::cout << "Неверный выбор. Выполняются обе задачи." << std::endl;
         runTask1(N, G);
         runTask2(N, G);
     }

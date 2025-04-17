@@ -91,28 +91,22 @@ void MarkovModel::buildTransitionMatrix() {
         for (int b = 0; b <= totalB; ++b) {
             int currentState = system.stateToIndex(a, b);
 
-            // Only add transitions if the system is operational
             if (a >= 1 && b >= params.NB) {
-                // Calculate failure rates based on exactly NA devices of type A and NB devices of type B
-                // If we have more than NA devices of type A, only NA devices contribute to failure rate
-                // If we have more than NB devices of type B, only NB devices contribute to failure rate
                 double rateA = 0.0;
                 double rateB = 0.0;
-                
-                // Only NA devices of type A contribute to failure rate
+
                 if (a <= params.NA) {
                     rateA = a * params.lambdaA;
                 } else {
                     rateA = params.NA * params.lambdaA;
                 }
-                
-                // Only NB devices of type B contribute to failure rate
+
                 if (b <= params.NB) {
                     rateB = b * params.lambdaB;
                 } else {
                     rateB = params.NB * params.lambdaB;
                 }
-                
+
                 double totalRate = rateA + rateB;
 
                 if (a > 0 && rateA > 0) {
@@ -127,8 +121,6 @@ void MarkovModel::buildTransitionMatrix() {
 
                 Q(currentState, currentState) = -totalRate;
             }
-            // For non-operational states, no transitions are possible
-            // This ensures vertex 17 (and other non-operational states) are unreachable
         }
     }
 }

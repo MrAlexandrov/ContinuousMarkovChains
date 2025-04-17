@@ -153,33 +153,26 @@ double RepairableMarkovModel::getRepairRate(int a, int b, int r) const {
 }
 
 Eigen::VectorXd RepairableMarkovModel::solveSteadyStateEquations() {
-    // Решаем систему линейных алгебраических уравнений для стационарного режима
     // Q^T * p = 0, sum(p) = 1
 
-    // Матрица для решения системы уравнений
     Eigen::MatrixXd A = Q.transpose();
 
-    // Заменяем последнюю строку на условие нормировки
     for (int i = 0; i < A.cols(); ++i) {
         A(A.rows() - 1, i) = 1.0;
     }
 
-    // Вектор правой части
     Eigen::VectorXd b = Eigen::VectorXd::Zero(numStates);
     b(numStates - 1) = 1.0;
 
-    // Решаем систему уравнений
     Eigen::VectorXd steadyStateProbs = A.colPivHouseholderQr().solve(b);
 
     return steadyStateProbs;
 }
 
 std::pair<Eigen::VectorXd, Eigen::MatrixXd> RepairableMarkovModel::solveKolmogorovEquations(double tMax, int steps) {
-    // Создаем вектор времени
     Eigen::VectorXd times = Eigen::VectorXd::LinSpaced(steps, 0, tMax);
 
-    // Решаем систему ОДУ с более мелким шагом
-    const int internalSteps = 20;  // Увеличьте это значение при необходимости
+    const int internalSteps = 20;
 
     Eigen::MatrixXd probabilities(numStates, steps);
     probabilities.col(0) = initialState;
@@ -188,7 +181,6 @@ std::pair<Eigen::VectorXd, Eigen::MatrixXd> RepairableMarkovModel::solveKolmogor
         double dt = (times(i + 1) - times(i)) / internalSteps;
         Eigen::VectorXd pi = probabilities.col(i);
 
-        // Выполняем несколько маленьких шагов между основными шагами
         for (int j = 0; j < internalSteps; ++j) {
             Eigen::VectorXd k1 = Q.transpose() * pi;
             Eigen::VectorXd k2 = Q.transpose() * (pi + dt / 2 * k1);
@@ -197,14 +189,12 @@ std::pair<Eigen::VectorXd, Eigen::MatrixXd> RepairableMarkovModel::solveKolmogor
 
             pi = pi + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4);
 
-            // Коррекция вероятностей
             for (int k = 0; k < numStates; ++k) {
                 if (pi(k) < 0) {
                     pi(k) = 0;
                 }
             }
 
-            // Нормализация
             double sum = pi.sum();
             if (sum > 0) {
                 pi /= sum;
@@ -221,11 +211,9 @@ double RepairableMarkovModel::estimateTransientTime(const Eigen::VectorXd& stead
     // Оценка времени переходного процесса - момент, когда евклидова норма вектора невязки
     // становится меньше tolerance от евклидовой нормы предельного вектора
 
-    // Вычисляем евклидову норму предельного вектора
     double steadyStateNorm = steadyStateProbs.norm();
 
-    // Предварительное моделирование для оценки времени
-    double initialTMax = 100.0;  // Начальное время моделирования
+    double initialTMax = 100.0;
     int steps = 1000;
 
     auto [times, probabilities] = solveKolmogorovEquations(initialTMax, steps);
@@ -239,7 +227,6 @@ double RepairableMarkovModel::estimateTransientTime(const Eigen::VectorXd& stead
         }
     }
 
-    // Если не достигли нужной точности, возвращаем conservative estimate
     return initialTMax;
 }
 
@@ -249,7 +236,7 @@ double RepairableMarkovModel::calculateFailureProbability(const Eigen::VectorXd&
 
     for (int i = 0; i < numStates; ++i) {
         auto [a, b, r] = system.indexToState(i);
-        if (a < 1 || b < params.NB) {  // Если состояние означает отказ системы
+        if (a < 1 || b < params.NB) {
             failureProb += stateProbs(i);
         }
     }
@@ -277,7 +264,7 @@ double RepairableMarkovModel::calculateRepairUtilization(const Eigen::VectorXd& 
 
     for (int i = 0; i < numStates; ++i) {
         auto [a, b, r] = system.indexToState(i);
-        if (r > 0) {  // Если ремонт идет
+        if (r > 0) {
             repairUtilization += stateProbs(i);
         }
     }
@@ -297,13 +284,11 @@ Eigen::VectorXd RepairableMarkovModel::getOperationalStates() const {
     return operationalStates;
 }
 
-// New method to aggregate probabilities by device states (ignoring repair states)
 Eigen::VectorXd RepairableMarkovModel::getAggregatedStateProbabilities(const Eigen::VectorXd& stateProbs) const {
     RepairableSystem system(params);
     const int totalA = params.NA + params.RA;
     const int totalB = params.NB + params.RB;
-    
-    // Number of aggregated states = (totalA+1)*(totalB+1)
+
     Eigen::VectorXd aggregatedProbs = Eigen::VectorXd::Zero((totalA+1)*(totalB+1));
 
     for (int i = 0; i < numStates; ++i) {
@@ -319,64 +304,54 @@ Eigen::MatrixXd RepairableMarkovModel::buildGraphTransitionMatrix() const {
     RepairableSystem system(params);
     const int totalA = params.NA + params.RA;
     const int totalB = params.NB + params.RB;
-    
-    // Размер матрицы для графа состояний (без учета состояния ремонта)
+
     int graphStates = (totalA + 1) * (totalB + 1);
     Eigen::MatrixXd graphQ = Eigen::MatrixXd::Zero(graphStates, graphStates);
-    
-    // Для каждого состояния (a, b) в графе
+
     for (int a = 0; a <= totalA; ++a) {
         for (int b = 0; b <= totalB; ++b) {
             int currentGraphIndex = system.stateToGraphIndex(a, b);
-            
-            // Суммарная интенсивность выхода из состояния
+
             double totalOutRate = 0.0;
-            
-            // Only add failure transitions if the system is operational
+
             if (a >= 1 && b >= params.NB) {
-                // Отказы устройств типа A (переход в состояние с меньшим a)
                 if (a > 0) {
                     int nextGraphIndex = system.stateToGraphIndex(a - 1, b);
-                    // Only exactly NA devices of type A contribute to failure rate
                     double rate = 0.0;
                     if (a <= params.NA) {
                         rate = a * params.lambdaA;
                     } else {
                         rate = params.NA * params.lambdaA;
                     }
-                    
+
                     if (rate > 0) {
                         graphQ(currentGraphIndex, nextGraphIndex) += rate;
                         totalOutRate += rate;
                     }
                 }
-                
-                // Отказы устройств типа B (переход в состояние с меньшим b)
+
                 if (b > 0) {
                     int nextGraphIndex = system.stateToGraphIndex(a, b - 1);
-                    // Only exactly NB devices of type B contribute to failure rate
                     double rate = 0.0;
                     if (b <= params.NB) {
                         rate = b * params.lambdaB;
                     } else {
                         rate = params.NB * params.lambdaB;
                     }
-                    
+
                     if (rate > 0) {
                         graphQ(currentGraphIndex, nextGraphIndex) += rate;
                         totalOutRate += rate;
                     }
                 }
             }
-            
-            // Ремонт устройств типа A (переход в состояние с большим a)
+
             if (a < totalA) {
                 int nextGraphIndex = system.stateToGraphIndex(a + 1, b);
-                
-                // Проверяем, возможен ли ремонт A в этом состоянии
+
                 int repairingA = totalA - a;
                 int repairingB = totalB - b;
-                
+
                 if (repairingA > 0 && (repairingA > repairingB ||
                     (repairingA == repairingB && params.lambdaA >= params.lambdaB))) {
                     double rate = params.lambdaS;
@@ -384,15 +359,13 @@ Eigen::MatrixXd RepairableMarkovModel::buildGraphTransitionMatrix() const {
                     totalOutRate += rate;
                 }
             }
-            
-            // Ремонт устройств типа B (переход в состояние с большим b)
+
             if (b < totalB) {
                 int nextGraphIndex = system.stateToGraphIndex(a, b + 1);
-                
-                // Проверяем, возможен ли ремонт B в этом состоянии
+
                 int repairingA = totalA - a;
                 int repairingB = totalB - b;
-                
+
                 if (repairingB > 0 && (repairingB > repairingA ||
                     (repairingB == repairingA && params.lambdaB > params.lambdaA))) {
                     double rate = params.lambdaS;
@@ -400,11 +373,10 @@ Eigen::MatrixXd RepairableMarkovModel::buildGraphTransitionMatrix() const {
                     totalOutRate += rate;
                 }
             }
-            
-            // Диагональный элемент - отрицательная сумма интенсивностей выхода
+
             graphQ(currentGraphIndex, currentGraphIndex) = -totalOutRate;
         }
     }
-    
+
     return graphQ;
 }

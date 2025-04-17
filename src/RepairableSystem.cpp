@@ -37,18 +37,15 @@ void RepairableSystem::deviceRepair() {
 }
 
 char RepairableSystem::getDeviceToRepair() const {
-    // Если нет устройств для ремонта, возвращаем 0
     if (repairingA == 0 && repairingB == 0) {
         return '0';
     }
 
-    // Проверяем приоритет: больше сломанных устройств
     if (repairingA > repairingB) {
         return 'A';
     } else if (repairingB > repairingA) {
         return 'B';
     } else {
-        // Если количество сломанных устройств одинаково, выбираем по интенсивности отказов
         return (params.lambdaA >= params.lambdaB) ? 'A' : 'B';
     }
 }
@@ -68,7 +65,7 @@ std::tuple<int, int, int> RepairableSystem::getCurrentState() const {
 int RepairableSystem::stateToIndex(int a, int b, int r) const {
     int totalA = params.NA + params.RA + 1;
     int totalB = params.NB + params.RB + 1;
-    int repairStates = 3; // Нет ремонта, ремонт A, ремонт B
+    int repairStates = 3;
 
     return (totalA * totalB * r) + (totalB * a) + b;
 }
@@ -76,7 +73,7 @@ int RepairableSystem::stateToIndex(int a, int b, int r) const {
 std::tuple<int, int, int> RepairableSystem::indexToState(int index) const {
     int totalA = params.NA + params.RA + 1;
     int totalB = params.NB + params.RB + 1;
-    int repairStates = 3; // Нет ремонта, ремонт A, ремонт B
+    int repairStates = 3;
 
     int r = index / (totalA * totalB);
     int remainder = index % (totalA * totalB);
@@ -89,7 +86,7 @@ std::tuple<int, int, int> RepairableSystem::indexToState(int index) const {
 int RepairableSystem::getTotalStates() const {
     int totalA = params.NA + params.RA + 1;
     int totalB = params.NB + params.RB + 1;
-    int repairStates = 3; // Нет ремонта, ремонт A, ремонт B
+    int repairStates = 3;
 
     return totalA * totalB * repairStates;
 }
@@ -97,8 +94,7 @@ int RepairableSystem::getTotalStates() const {
 int RepairableSystem::stateToGraphIndex(int a, int b) const {
     int totalA = params.NA + params.RA + 1;
     int totalB = params.NB + params.RB + 1;
-    
-    // Используем ту же формулу, что и в System::stateToIndex
+
     return (totalA - a - 1) * totalB + (totalB - b - 1);
 }
 

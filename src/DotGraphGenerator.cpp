@@ -34,13 +34,10 @@ void DotGraphGenerator::generateStateGraph(const System& system, const std::stri
     for (int a = 0; a <= totalA; ++a) {
         for (int b = 0; b <= totalB; ++b) {
             int currentIndex = system.stateToIndex(a, b);
-            
-            // Only draw edges from operational states
+
             if (a >= 1 && b >= params.NB) {
-                // Only active devices contribute to failure rate
                 if (a > 0) {
-                    int nextIndex = system.stateToIndex(a - 1, b);
-                    // Only exactly NA devices of type A contribute to failure rate
+                    int nextIndex = system.stateToIndex(a - 1, b);s
                     double rate = std::min(a, params.NA) * params.lambdaA;
                     if (rate > 0) {
                         dotFile << "  S" << currentIndex << " -> S" << nextIndex << " [label=\"" << std::fixed << std::setprecision(2) << rate << "\"];" << "\n";
@@ -49,7 +46,6 @@ void DotGraphGenerator::generateStateGraph(const System& system, const std::stri
 
                 if (b > 0) {
                     int nextIndex = system.stateToIndex(a, b - 1);
-                    // Only exactly NB devices of type B contribute to failure rate
                     double rate = std::min(b, params.NB) * params.lambdaB;
                     if (rate > 0) {
                         dotFile << "  S" << currentIndex << " -> S" << nextIndex << " [label=\"" << std::fixed << std::setprecision(2) << rate << "\"];" << "\n";
@@ -129,7 +125,7 @@ void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& sys
         }
         dotFile << "}\n";
     }
-    
+
     // Создаем узлы
     for (int a = 0; a <= totalA; ++a) {
         for (int b = 0; b <= totalB; ++b) {
@@ -142,23 +138,17 @@ void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& sys
                 nodeStyle = "style=filled, fillcolor=lightcoral";
             }
 
-            // Добавляем информацию о позиции для лучшего размещения
             dotFile << "  S" << stateIndex << " [label=\"S" << stateIndex << "\\n(" << a << "," << b << ")\", " << nodeStyle << "];" << "\n";
         }
     }
 
-    // Добавляем ребра для отказов и ремонтов
-    // Обходим состояния в обратном порядке (от большего к меньшему)
     for (int a = 0; a <= totalA; ++a) {
         for (int b = 0; b <= totalB; ++b) {
             int currentIndex = system.stateToGraphIndex(a, b);
 
-            // Only draw failure edges from operational states
             if (a >= 1 && b >= params.NB) {
-                // Ребра для отказов устройств типа A (красные сплошные)
                 if (a > 0) {
                     int nextIndex = system.stateToGraphIndex(a - 1, b);
-                    // Only exactly NA devices of type A contribute to failure rate
                     double rate = std::min(a, params.NA) * params.lambdaA;
                     if (rate > 0) {
                         dotFile << "  S" << currentIndex << " -> S" << nextIndex
@@ -167,10 +157,8 @@ void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& sys
                     }
                 }
 
-                // Ребра для отказов устройств типа B (красные сплошные)
                 if (b > 0) {
                     int nextIndex = system.stateToGraphIndex(a, b - 1);
-                    // Only exactly NB devices of type B contribute to failure rate
                     double rate = std::min(b, params.NB) * params.lambdaB;
                     if (rate > 0) {
                         dotFile << "  S" << currentIndex << " -> S" << nextIndex
@@ -180,12 +168,8 @@ void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& sys
                 }
             }
 
-            // Добавляем ребра для ремонта (синие пунктирные)
-            // Ремонт устройства A (переход из (a,b) в (a+1,b))
             if (a < totalA) {
                 int nextIndex = system.stateToGraphIndex(a + 1, b);
-                // Проверяем, возможен ли ремонт A в этом состоянии
-                // Ремонт возможен, если есть сломанные устройства A и приоритет у A
                 if ((totalA - a) > 0 && ((totalA - a) > (totalB - b) ||
                     ((totalA - a) == (totalB - b) && params.lambdaA >= params.lambdaB))) {
                     dotFile << "  S" << currentIndex << " -> S" << nextIndex
@@ -194,11 +178,8 @@ void DotGraphGenerator::generateRepairableStateGraph(const RepairableSystem& sys
                 }
             }
 
-            // Ремонт устройства B (переход из (a,b) в (a,b+1))
             if (b < totalB) {
                 int nextIndex = system.stateToGraphIndex(a, b + 1);
-                // Проверяем, возможен ли ремонт B в этом состоянии
-                // Ремонт возможен, если есть сломанные устройства B и приоритет у B
                 if ((totalB - b) > 0 && ((totalB - b) > (totalA - a) ||
                     ((totalB - b) == (totalA - a) && params.lambdaB > params.lambdaA))) {
                     dotFile << "  S" << currentIndex << " -> S" << nextIndex
