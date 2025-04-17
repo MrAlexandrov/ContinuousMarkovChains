@@ -1,6 +1,6 @@
 #include "RepairableSimulator.h"
-#include "GnuplotPlotter.h"
-#include <algorithm>
+// #include "GnuplotPlotter.h"
+// #include <algorithm>
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -239,11 +239,11 @@ std::vector<std::tuple<double, int, int, int>> RepairableSimulator::simulateDisc
 }
 
 void RepairableSimulator::runMarkovChainSimulation(double simulationTime) {
-    std::cout << "Запуск моделирования непрерывной марковской цепи..." << std::endl;
+    std::cout << "Запуск моделирования непрерывной марковской цепи..." << "\n";
 
     auto trajectory = simulateMarkovChain(simulationTime);
 
-    std::cout << "Моделирование завершено. Количество точек: " << trajectory.size() << std::endl;
+    std::cout << "Моделирование завершено. Количество точек: " << trajectory.size() << "\n";
 
     calculateStatistics(trajectory);
 
@@ -256,15 +256,15 @@ void RepairableSimulator::runMarkovChainSimulation(double simulationTime) {
 
     outputFile.close();
 
-    std::cout << "Результаты сохранены в файл repairable_markov_chain_trajectory.dat" << std::endl;
+    std::cout << "Результаты сохранены в файл repairable_markov_chain_trajectory.dat" << "\n";
 }
 
 void RepairableSimulator::runDiscreteEventSimulation(double simulationTime) {
-    std::cout << "Запуск дискретно-событийного моделирования..." << std::endl;
+    std::cout << "Запуск дискретно-событийного моделирования..." << "\n";
 
     auto trajectory = simulateDiscreteEvents(simulationTime);
 
-    std::cout << "Моделирование завершено. Количество точек: " << trajectory.size() << std::endl;
+    std::cout << "Моделирование завершено. Количество точек: " << trajectory.size() << "\n";
 
     calculateStatistics(trajectory);
 
@@ -277,12 +277,12 @@ void RepairableSimulator::runDiscreteEventSimulation(double simulationTime) {
 
     outputFile.close();
 
-    std::cout << "Результаты сохранены в файл repairable_discrete_event_trajectory.dat" << std::endl;
+    std::cout << "Результаты сохранены в файл repairable_discrete_event_trajectory.dat" << "\n";
 }
 
 void RepairableSimulator::calculateStatistics(const std::vector<std::tuple<double, int, int, int>>& trajectory) {
     if (trajectory.empty()) {
-        std::cout << "Нет данных для анализа." << std::endl;
+        std::cout << "Нет данных для анализа." << "\n";
         return;
     }
 
@@ -335,9 +335,9 @@ void RepairableSimulator::calculateStatistics(const std::vector<std::tuple<doubl
     }
 
     std::cout << std::fixed << std::setprecision(6);
-    std::cout << "Статистика по результатам моделирования:" << std::endl;
-    std::cout << "Вероятность отказа системы: " << failureProb << std::endl;
-    std::cout << "Среднее число готовых устройств типа A: " << avgWorkingA << std::endl;
-    std::cout << "Среднее число готовых устройств типа B: " << avgWorkingB << std::endl;
-    std::cout << "Коэффициент загрузки ремонтной службы: " << repairUtilization << std::endl;
+    std::cout << "Статистика по результатам моделирования:" << "\n";
+    std::cout << "Вероятность отказа системы: " << failureProb << "\n";
+    std::cout << "Среднее число готовых устройств типа A: " << avgWorkingA << "\n";
+    std::cout << "Среднее число готовых устройств типа B: " << avgWorkingB << "\n";
+    std::cout << "Коэффициент загрузки ремонтной службы: " << repairUtilization << "\n";
 }
