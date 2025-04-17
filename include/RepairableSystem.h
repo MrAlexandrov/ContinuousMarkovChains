@@ -3,7 +3,6 @@
 #include "RepairableSystemParams.h"
 
 #include <utility>
-#include <vector>
 
 class RepairableSystem {
 private:

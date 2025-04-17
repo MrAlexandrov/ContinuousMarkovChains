@@ -1,7 +1,7 @@
 #include "../include/GnuplotPlotter.h"
+
 #include <fstream>
 #include <cstdlib>
-#include <sstream>
 #include <algorithm>
 #include <cmath>
 

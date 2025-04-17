@@ -1,9 +1,9 @@
 #pragma once
+
 #include "RepairableSystem.h"
+
 #include <random>
 #include <vector>
-#include <utility>
-#include <queue>
 #include <tuple>
 
 enum class EventType {

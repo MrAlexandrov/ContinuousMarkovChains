@@ -1,5 +1,7 @@
 #pragma once
+
 #include "SystemParams.h"
+
 #include <utility>
 
 class System {

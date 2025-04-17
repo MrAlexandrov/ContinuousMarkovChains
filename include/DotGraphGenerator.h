@@ -1,10 +1,13 @@
 #pragma once
-#include <Eigen/Dense>
-#include <string>
+
 #include "System.h"
 #include "SystemParams.h"
 #include "RepairableSystem.h"
 #include "RepairableSystemParams.h"
+
+#include <Eigen/Dense>
+
+#include <string>
 
 class DotGraphGenerator {
 public:

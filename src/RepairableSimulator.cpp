@@ -1,10 +1,9 @@
 #include "RepairableSimulator.h"
-// #include "GnuplotPlotter.h"
-// #include <algorithm>
+
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <functional>
+#include <queue>
 #include <fstream>
 #include <map>
 

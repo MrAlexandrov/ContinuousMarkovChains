@@ -1,15 +1,10 @@
 #include "GnuplotPlotter.h"
 #include "RepairableMarkovModel.h"
+
 #include <fstream>
 #include <cstdlib>
 #include <sstream>
 #include <vector>
-#include <fstream>
-#include <cstdlib>
-#include <sstream>
-#include <fstream>
-#include <cstdlib>
-#include <sstream>
 
 void GnuplotPlotter::plotStatesProbabilities(
     const Eigen::VectorXd& times

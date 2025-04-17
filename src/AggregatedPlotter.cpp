@@ -1,8 +1,8 @@
 #include "../include/GnuplotPlotter.h"
 #include "../include/RepairableMarkovModel.h"
+
 #include <fstream>
 #include <cstdlib>
-#include <sstream>
 
 void GnuplotPlotter::plotAggregatedStates(
     const Eigen::VectorXd& times,

@@ -3,7 +3,6 @@
 #include "../include/RepairableSystemParams.h"
 #include <eigen3/Eigen/Dense>
 
-#include <numeric>
 #include <cmath>
 
 RepairableMarkovModel::RepairableMarkovModel(const RepairableSystemParams& params)

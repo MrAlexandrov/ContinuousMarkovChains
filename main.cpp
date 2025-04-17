@@ -9,7 +9,6 @@
 #include "../include/SystemParams.h"
 #include <eigen3/Eigen/Dense>
 
-#include <exception>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -217,12 +216,10 @@ void runTask2(int N, int G) {
 
     Separate(7);
     std::cout << "Решение системы дифференциальных уравнений:" << "\n";
-    // Оценка времени переходного процесса
     double transientTime = model.estimateTransientTime(steadyStateProbs);
     std::cout << "Оценка времени переходного процесса: " << transientTime << "\n";
 
-    // Решаем нестационарные уравнения Колмогорова (переходный процесс)
-    double modelingTime = 2 * transientTime;  // Время моделирования вдвое больше времени переходного процесса
+    double modelingTime = 2 * transientTime;
     auto [times, probabilities] = model.solveKolmogorovEquations(modelingTime, 200);
 
     Separate(8);
@@ -235,12 +232,10 @@ void runTask2(int N, int G) {
     RepairableSimulator simulator(params);
     simulator.runMarkovChainSimulation(modelingTime);
 
-    // Визуализация траектории марковского процесса
     std::vector<std::tuple<double, int, int, int>> markovTrajectory;
     std::ifstream markovFile("repairable_markov_chain_trajectory.dat");
     std::string line;
 
-    // Пропускаем заголовок
     std::getline(markovFile, line);
 
     double time;
@@ -259,11 +254,9 @@ void runTask2(int N, int G) {
     std::cout << "Имитационное моделирование в терминах дискретно-событийного моделирования:" << "\n";
     simulator.runDiscreteEventSimulation(modelingTime);
 
-    // Визуализация траектории дискретно-событийного процесса
     std::vector<std::tuple<double, int, int, int>> discreteTrajectory;
     std::ifstream discreteFile("repairable_discrete_event_trajectory.dat");
 
-    // Пропускаем заголовок
     std::getline(discreteFile, line);
 
     while (discreteFile >> time >> a >> b >> r) {
@@ -277,7 +270,7 @@ void runTask2(int N, int G) {
     }
 }
 
-} // anonimous namespace
+} // anonymous namespace
 
 int main() {
     int N = 260;
