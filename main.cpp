@@ -127,6 +127,10 @@ void runTask1(int N, int G) {
     Separate(4);
     std::cout << "Решение системы дифференциальных уравнений:" << "\n";
     auto [times, probabilities] = model.solveKolmogorovEquations(2.0, 100);
+    int last = probabilities.cols() - 1;
+    for (int i = 0, end = probabilities.rows(); i < end; ++i) {
+        std::cout << i << " " << probabilities(i, last) << "\n";
+    }
 
     Separate(5);
     std::cout << "Построение графиков вероятностей состояний:" << "\n";
@@ -207,7 +211,7 @@ void runTask2(int N, int G) {
     for (int a = 0; a < totalA; ++a) {
         for (int b = 0; b < totalB; ++b) {
             int aggregatedIndex = b * totalA + a;
-            if (aggregatedProbs(aggregatedIndex) > 0.001) {  // Выводим только значимые вероятности
+            if (aggregatedProbs(aggregatedIndex) > 0.001) {
                 std::cout << "P(" << a << "," << b << ") = " << aggregatedProbs(aggregatedIndex) << "\n";
             }
         }
